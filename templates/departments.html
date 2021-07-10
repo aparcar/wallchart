@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Departments</h2>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Chair</th>
+	</tr>
+	{% for department in department_list %}
+	<tr>
+		<td>{{ department.name }}</td>
+		<td>{{ department.chair.name | default("None") }}</td>
+	</tr>
+	{% endfor %}
+</table>
+{% include "includes/pagination.html" %}
+{% endblock %}
