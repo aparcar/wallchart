@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Create</h2>
+<form action="/workers/edit/{{ worker.id }}" method=post>
+	<h3>
+	Worker {{ worker.name }}
+	</h3>
+	<p>
+	<p>Added since {{ worker.added }}, last known contract from {{ worker.updated }}<p>
+	<label for="email">E-Mail</label>
+	<input name="email" type="text" value="{{ worker.email }}" />
+	</p>
+	<p>
+	<label for="phone">Phone</label>
+	<input name="phone" type="text" value="{{ worker.phone }}" />
+	</p>
+	<p>
+	<label for="notes">Notes</label>
+	<textarea name="notes">{{ worker.notes }}</textarea>
+	</p>
+	<input type="submit" value="Update data" />
+</form>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Workers {% if department %} in {{ department.name }} {% endif %}({{ worker_count }})</h2>
+<script>
+	function toggleParticipation(element) {
+			console.log(element)
+			fetch("/participation/" +
+					element.dataset.worker + "/" +
+					element.dataset.structure_test + "/" +
+					(element.checked ? 1 : 0)).then(response => console.log(response));
+		}
+</script>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Unit</th>
+		<th>Contract</th>
+		<th>E-Mail</th>
+		<th>Phone</th>
+		{% for structure_test in structure_test_list %}
+		<th>{{ structure_test.name }}</th>
+		{% endfor %}
+
+	</tr>
+	{% for _, worker_list in worker_list | groupby("id") %}
+	{% set worker = worker_list[0] %}
+	{% set participation = [] %}
+	{% for participated in worker_list %}
+	{% if participated.participation %}
+	{{ participation.append(participated.participation.structure_test_id) or "" }}
+	{% endif %}
+	{% endfor %}
+	<tr>
+		<td>
+			<a href="/workers/edit/{{ worker.id }}">
+				{{ worker.name }}
+			</a>
+		</td>
+		<td>{{ worker.unit }}</td>
+		<td>{{ worker.contract }}</td>
+		<td>{% if worker.email %}<a href="mailto:{{ worker.email }}">{{ worker.email }}</a>{% else %}Unknown{% endif %}</td>
+		<td>{{ worker.phone | default("Unknown") }}</td>
+		{% for structure_test in structure_test_list %}
+		<th>
+			<input
+				type="checkbox"
+				data-worker="{{ worker.id }}"
+				data-structure_test="{{ structure_test.id }}"
+				name="{{ structure_test.name }}"
+				onchange="toggleParticipation(this);"
+				{% if structure_test.id in participation %}checked{% endif %}
+				>
+		</th>
+			{% endfor %}
+	</tr>
+	{% endfor %}
+</table>
+{% include "includes/pagination.html" %}
+{% endblock %}

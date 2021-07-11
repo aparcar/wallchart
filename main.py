@@ -25,15 +25,15 @@ from hashlib import sha256
 from pathlib import Path
 from slugify import slugify
 from datetime import date
-
+from peewee import fn
 
 import csv
 
 import logging
 
-# logger = logging.getLogger("peewee")
-# logger.addHandler(logging.StreamHandler())
-# logger.setLevel(logging.DEBUG)
+logger = logging.getLogger("peewee")
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.DEBUG)
 
 
 DATABASE = "wallcharts.db"
@@ -67,17 +67,16 @@ class Worker(BaseModel):
         indexes = ((("name", "unit", "department_id", "contract"), True),)
 
 
-class Department(BaseModel):
-    id = IntegerField(primary_key=True)
-    name = CharField()
-    chair = ForeignKeyField(Worker, field="id", backref="chair", null=True)
-    slug = CharField()
-
-
 class User(BaseModel):
     username = CharField(unique=True)
     password = CharField()
     email = CharField(unique=True)
+
+
+class Department(BaseModel):
+    name = CharField()
+    chair = ForeignKeyField(User, backref="chair", null=True)
+    slug = CharField()
 
 
 class StructureTest(BaseModel):
@@ -112,8 +111,8 @@ def get_current_user():
 def login_required(f):
     @wraps(f)
     def inner(*args, **kwargs):
-        if not session.get("logged_in"):
-            return redirect(url_for("login"))
+        #if not session.get("logged_in"):
+        #    return redirect(url_for("login"))
         return f(*args, **kwargs)
 
     return inner
@@ -167,7 +166,7 @@ def login():
 @app.route("/departments/")
 @login_required
 def departments():
-    departments = Department.select().order_by(Department.name.desc())
+    departments = Department.select().order_by(Department.name)
     return object_list("departments.html", departments, "department_list")
 
 
@@ -177,13 +176,12 @@ def workers(department_slug):
     department = Department.get(Department.slug == department_slug)
 
     workers = (
-        Worker.select()
+        Worker.select(Worker, Participation)
         .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
-        .where(Worker.department_id == department.id or "*")
+        .where(Worker.department_id == department.id)
         .order_by(Worker.name)
     )
     structure_tests = StructureTest.select().order_by(StructureTest.added)
-    print(structure_tests)
 
     return object_list(
         "workers.html",
@@ -228,6 +226,15 @@ def workers_edit(worker_id):
     return render_template("workers_edit.html", worker=worker)
 
 
+@app.route("/participation/<int:worker>/<int:structure_test>/<int:status>")
+def participation(worker, structure_test, status):
+    if status == 1:
+        Participation.create(worker=worker, structure_test=structure_test)
+    else:
+        Participation.delete().where(worker=worker, structure_test=structure_test)
+    return ""
+
+
 @app.route("/logout/")
 def logout():
     session.pop("logged_in", None)
@@ -242,7 +249,6 @@ def parse_csv():
         for row in reader:
             print(row)
             department, created = Department.get_or_create(
-                id=row["Dept ID"],
                 name=row["Dept ID Desc"].title(),
                 slug=slugify(row["Dept ID Desc"]),
             )
@@ -252,7 +258,7 @@ def parse_csv():
             Worker.get_or_create(
                 name=row["Name"],
                 contract=row["Job Code"],
-                department_id=row["Dept ID"],
+                department_id=department.id,
                 unit=row["Unit"],
                 updated=date.today(),
             )
@@ -268,6 +274,7 @@ if __name__ == "__main__":
         email="admin@admin.com",
     )
 
-    Participation.get_or_create(worker=1281, structure_test=1)
+    Participation.get_or_create(worker=625, structure_test=1)
+    Participation.get_or_create(worker=625, structure_test=2)
 
     app.run()

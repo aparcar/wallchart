@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Structure Tests</h2>
+<form action="{{ url_for("structure_tests") }}" method=post>
+	<h3>Add new structure test</h3>
+	<p>
+	<label for="name">Name</label>
+	<input name="name" type="text" value="" />
+	</p>
+	<p>
+	<label for="description">Description</label>
+	<textarea name="description"></textarea>
+	</p>
+	<input type="submit" value="Create structure test" />
+</form>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Description</th>
+		<th>Active</th>
+		<th>Added</th>
+	</tr>
+	{% for structure_test in structure_tests_list %}
+	<tr>
+		<td>
+			<a href="/structure_tests/edit/{{ structure_test.id }}">
+				{{ structure_test.name }}
+			</a>
+		</td>
+		<td>{{ structure_test.description}}</td>
+		<td>{{ structure_test.active }}</td>
+		<td>{{ structure_test.added }}</td>
+	</tr>
+	{% endfor %}
+</table>
+{% endblock %}

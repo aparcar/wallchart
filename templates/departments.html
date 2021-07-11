@@ -8,7 +8,11 @@
 	</tr>
 	{% for department in department_list %}
 	<tr>
-		<td>{{ department.name }}</td>
+		<td>
+			<a href="/workers/{{ department.slug }}">
+				{{ department.name }}
+			</a>
+		</td>
 		<td>{{ department.chair.name | default("None") }}</td>
 	</tr>
 	{% endfor %}
