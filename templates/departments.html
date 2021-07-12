@@ -13,7 +13,7 @@
 				{{ department.name }}
 			</a>
 		</td>
-		<td>{{ department.chair.name | default("None") }}</td>
+		<td>{{ department.name | default("None") }}</td>
 	</tr>
 	{% endfor %}
 </table>

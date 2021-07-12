@@ -99,6 +99,7 @@ def auth_user(user):
     session["logged_in"] = True
     session["user_id"] = user.id
     session["email"] = user.email
+    session["department_id"] = user.department_id
     flash(f"You are logged in as {user.email}")
 
 
@@ -140,8 +141,12 @@ def object_list(template_name, qr, var_name="object_list", **kwargs):
 
 @app.route("/")
 def homepage():
+    print(session.get("department_id"))
     if session.get("logged_in"):
-        return redirect(url_for("login"))
+        if session.get("department_id") == 0:
+            return redirect(url_for("users"))
+        else:
+            return redirect(url_for("workers"))
     else:
         return redirect(url_for("login"))
 
@@ -170,9 +175,13 @@ def departments():
 
 
 @app.route("/workers/<path:department_slug>")
+@app.route("/workers/")
 @login_required
-def workers(department_slug):
-    department = Department.get(Department.slug == department_slug)
+def workers(department_slug=None):
+    if department_slug and session.get("department_id") == 0:
+        department = Department.get(Department.slug == department_slug)
+    else:
+        department = Department.get(Department.id == session.get("department_id"))
 
     workers = (
         Worker.select(Worker, Participation)
@@ -180,6 +189,7 @@ def workers(department_slug):
         .where(Worker.department_id == department.id)
         .order_by(Worker.name)
     )
+
     structure_tests = StructureTest.select().order_by(StructureTest.added)
 
     return object_list(
@@ -235,14 +245,16 @@ def users():
                 User.department_id: request.form["department"],
             }
             if request.form.get("password"):
-                update[User.password] = sha256(request.form["password"].encode("utf-8"))
+                update[User.password] = sha256(
+                    request.form["password"].encode("utf-8")
+                ).hexdigest()
 
             User.update(update).where(User.id == request.form["id"]).execute()
             flash("User updated")
         else:
             User.create(
                 email=request.form["email"],
-                password=sha256(request.form["password"].encode("utf-8")),
+                password=sha256(request.form["password"].encode("utf-8")).hexdigest(),
                 department_id=request.form["department"],
             )
             flash("User created")
@@ -301,6 +313,7 @@ if __name__ == "__main__":
         User.get_or_create(
             email="admin@admin.com",
             password=sha256("admin".encode("utf-8")).hexdigest(),
+            department_id=0,
         )
         parse_csv()
 
