@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Users</h2>
+<h3>
+	Create User
+</h3>
+<form action="{{ url_for("users") }}" method=post>
+	<label for="email">E-Mail</label>
+	<input name="email" type="text" value="" />
+	<label for="password">Password</label>
+	<input name="password" type="password" value="" autocomplete="off" />
+	<select name="department">
+		{% for department in departments %}
+		<option value="{{ department.id }}">
+		{{ department.name }}
+		</option>
+		{% endfor %}
+	</select>
+	<input type="submit" value="Create user" />
+</form>
+
+<h3>
+	Existing Users
+</h3>
+{% for user in users %}
+<form action="{{ url_for("users") }}" method=post autocomplete="off">
+	<label for="email">E-Mail</label>
+	<input name="email" type="text" value="{{ user.email }}" />
+	<label for="password">Password</label>
+	<input name="password" type="password" value=""  autocomplete="off"/>
+	<input name="id" type="hidden" value="{{ user.id }}" />
+	<select name="department">
+		{% for department in departments %}
+		<option
+			value="{{ department.id }}"
+			{% if user.department_id == department.id %}selected="selected"{% endif %}
+			>
+			{{ user.chair }} 
+			{{ department.name }}
+		</option>
+		{% endfor %}
+	</select>
+	<input type="submit" value="Update user" />
+</form>
+{% endfor %}
+{% endblock %}

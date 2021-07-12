@@ -68,14 +68,13 @@ class Worker(BaseModel):
 
 
 class User(BaseModel):
-    username = CharField(unique=True)
-    password = CharField()
     email = CharField(unique=True)
+    password = CharField()
+    department_id = IntegerField(null=True)
 
 
 class Department(BaseModel):
     name = CharField()
-    chair = ForeignKeyField(User, backref="chair", null=True)
     slug = CharField()
 
 
@@ -99,8 +98,8 @@ def create_tables():
 def auth_user(user):
     session["logged_in"] = True
     session["user_id"] = user.id
-    session["username"] = user.username
-    flash(f"You are logged in as {user.username}")
+    session["email"] = user.email
+    flash(f"You are logged in as {user.email}")
 
 
 def get_current_user():
@@ -111,8 +110,8 @@ def get_current_user():
 def login_required(f):
     @wraps(f)
     def inner(*args, **kwargs):
-        #if not session.get("logged_in"):
-        #    return redirect(url_for("login"))
+        if not session.get("logged_in"):
+            return redirect(url_for("login"))
         return f(*args, **kwargs)
 
     return inner
@@ -149,11 +148,11 @@ def homepage():
 
 @app.route("/login/", methods=["GET", "POST"])
 def login():
-    if request.method == "POST" and request.form["username"]:
+    if request.method == "POST" and request.form["email"]:
         try:
             pw_hash = sha256(request.form["password"].encode("utf-8")).hexdigest()
             user = User.get(
-                (User.username == request.form["username"]) & (User.password == pw_hash)
+                (User.email == request.form["email"]) & (User.password == pw_hash)
             )
         except User.DoesNotExist:
             flash("The password entered is incorrect")
@@ -226,6 +225,33 @@ def workers_edit(worker_id):
     return render_template("workers_edit.html", worker=worker)
 
 
+@app.route("/users/", methods=["GET", "POST"])
+@login_required
+def users():
+    if request.method == "POST":
+        if request.form.get("id"):
+            update = {
+                User.email: request.form["email"],
+                User.department_id: request.form["department"],
+            }
+            if request.form.get("password"):
+                update[User.password] = sha256(request.form["password"].encode("utf-8"))
+
+            User.update(update).where(User.id == request.form["id"]).execute()
+            flash("User updated")
+        else:
+            User.create(
+                email=request.form["email"],
+                password=sha256(request.form["password"].encode("utf-8")),
+                department_id=request.form["department"],
+            )
+            flash("User created")
+
+    users = User.select()
+    departments = Department.select()
+    return render_template("users.html", users=users, departments=departments)
+
+
 @app.route("/participation/<int:worker>/<int:structure_test>/<int:status>")
 def participation(worker, structure_test, status):
     if status == 1:
@@ -267,12 +293,16 @@ def parse_csv():
 if __name__ == "__main__":
     if not Path(DATABASE).exists():
         create_tables()
+        Department.get_or_create(
+            id=0,
+            name="Admin",
+            slug="admin",
+        )
+        User.get_or_create(
+            email="admin@admin.com",
+            password=sha256("admin".encode("utf-8")).hexdigest(),
+        )
         parse_csv()
-    User.get_or_create(
-        username="admin",
-        password=sha256("admin".encode("utf-8")).hexdigest(),
-        email="admin@admin.com",
-    )
 
     Participation.get_or_create(worker=625, structure_test=1)
     Participation.get_or_create(worker=625, structure_test=2)
