@@ -8,15 +8,15 @@
 	<p>
 	<p>Added since {{ worker.added }}, last known contract from {{ worker.updated }}<p>
 	<label for="email">E-Mail</label>
-	<input name="email" type="text" value="{{ worker.email }}" />
+	<input name="email" type="text" value="{{ worker.email or "" }}" placeholder="worker@email.com" />
 	</p>
 	<p>
-	<label for="phone">Phone</label>
-	<input name="phone" type="text" value="{{ worker.phone }}" />
+	<label for="phone">Phone (only numbers)</label>
+	<input name="phone" type="text" value="{{ worker.phone or ""}}" placeholder="18081234567" />
 	</p>
 	<p>
 	<label for="notes">Notes</label>
-	<textarea name="notes">{{ worker.notes }}</textarea>
+	<textarea name="notes">{{ worker.notes or "" }}</textarea>
 	</p>
 	<input type="submit" value="Update data" />
 </form>

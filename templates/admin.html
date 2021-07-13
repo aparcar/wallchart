@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Admin</h2>
+
+Manage Wall Charts
+
+<ul>
+	<li><a href="{{ url_for("departments") }}">See all Departments</a></li>
+	<li><a href="{{ url_for("structure_tests") }}">Manage Structure Tests</a></li>
+	<li><a href="{{ url_for("colleges") }}">Manage Colleges<a/></li>
+	<li><a href="{{ url_for("users") }}">Manage Users<a/></li>
+	<li><a href="{{ url_for("upload_record") }}">Upload contract record<a/></li>
+</ul>
+
+{% endblock %}

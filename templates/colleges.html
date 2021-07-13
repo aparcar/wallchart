@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Users</h2>
+<p>
+Create colleges.
+</p>
+<h3>
+	Existing colleges
+</h3>
+<ul>
+	{% for college in colleges %}
+	<li>{{ college.name }}</li>
+	{% if college.departments %}
+	<ul>
+		{% for department in college.departments %}
+		<li><a href="{{ url_for("workers", department_slug=department.slug) }}">
+				{{ department.name }}
+				<a/>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	</li>
+	{% endfor %}
+</ul>
+
+<h3>
+	Create new college
+</h3>
+<form action="{{ url_for("colleges") }}" method=post>
+	<label for="name">Name</label>
+	<input name="name" type="text" value="" />
+	<input type="submit" value="Create college" />
+</form>
+
+{% endblock %}

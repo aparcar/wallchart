@@ -1,6 +1,7 @@
 from peewee import SqliteDatabase
 from peewee import Model
 from peewee import CharField
+import io
 from peewee import BooleanField
 from peewee import TextField
 from peewee import ForeignKeyField
@@ -61,21 +62,27 @@ class Worker(BaseModel):
     department_id = IntegerField()
     active = BooleanField(default=True)
     added = DateField(default=date.today)
-    updated = DateField()
+    updated = DateField(default=date.today)
 
     class Meta:
         indexes = ((("name", "unit", "department_id", "contract"), True),)
 
 
-class User(BaseModel):
-    email = CharField(unique=True)
-    password = CharField()
-    department_id = IntegerField(null=True)
+class College(BaseModel):
+    name = CharField(unique=True)
+    slug = CharField()
 
 
 class Department(BaseModel):
-    name = CharField()
+    name = CharField(unique=True)
     slug = CharField()
+    college = ForeignKeyField(College, backref="departments", null=True)
+
+
+class User(BaseModel):
+    email = CharField(unique=True)
+    password = CharField()
+    department = ForeignKeyField(Department, backref="chair", null=True)
 
 
 class StructureTest(BaseModel):
@@ -92,14 +99,16 @@ class Participation(BaseModel):
 
 def create_tables():
     with database:
-        database.create_tables([Worker, Department, User, StructureTest, Participation])
+        database.create_tables(
+            [Worker, College, Department, User, StructureTest, Participation]
+        )
 
 
 def auth_user(user):
     session["logged_in"] = True
     session["user_id"] = user.id
     session["email"] = user.email
-    session["department_id"] = user.department_id
+    session["department_id"] = user.department.id
     flash(f"You are logged in as {user.email}")
 
 
@@ -141,14 +150,18 @@ def object_list(template_name, qr, var_name="object_list", **kwargs):
 
 @app.route("/")
 def homepage():
-    print(session.get("department_id"))
     if session.get("logged_in"):
         if session.get("department_id") == 0:
-            return redirect(url_for("users"))
+            return redirect(url_for("admin"))
         else:
             return redirect(url_for("workers"))
     else:
         return redirect(url_for("login"))
+
+
+@app.route("/admin")
+def admin():
+    return render_template("admin.html")
 
 
 @app.route("/login/", methods=["GET", "POST"])
@@ -167,11 +180,31 @@ def login():
     return render_template("login.html")
 
 
+@app.route("/colleges/", methods=["GET", "POST"])
+@login_required
+def colleges():
+    if request.method == "POST":
+        College.create(
+            name=request.form["name"],
+            slug=slugify(request.form["name"]),
+        )
+        flash("College created")
+
+    colleges = College.select().group_by(College.name)
+    return render_template("colleges.html", colleges=colleges)
+
+
 @app.route("/departments/")
 @login_required
 def departments():
     departments = Department.select().order_by(Department.name)
-    return object_list("departments.html", departments, "department_list")
+    department_count = len(departments)
+    return object_list(
+        "departments.html",
+        departments,
+        "department_list",
+        department_count=department_count,
+    )
 
 
 @app.route("/workers/<path:department_slug>")
@@ -190,6 +223,9 @@ def workers(department_slug=None):
         .order_by(Worker.name)
     )
 
+    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
+    colleges = College.select().order_by(College.name)
+
     structure_tests = StructureTest.select().order_by(StructureTest.added)
 
     return object_list(
@@ -199,6 +235,8 @@ def workers(department_slug=None):
         worker_count=len(workers),
         department=department,
         structure_test_list=structure_tests,
+        last_updated=last_updated,
+        colleges=colleges,
     )
 
 
@@ -242,7 +280,7 @@ def users():
         if request.form.get("id"):
             update = {
                 User.email: request.form["email"],
-                User.department_id: request.form["department"],
+                User.department: request.form["department"],
             }
             if request.form.get("password"):
                 update[User.password] = sha256(
@@ -255,22 +293,43 @@ def users():
             User.create(
                 email=request.form["email"],
                 password=sha256(request.form["password"].encode("utf-8")).hexdigest(),
-                department_id=request.form["department"],
+                department=request.form["department"],
             )
             flash("User created")
 
     users = User.select()
-    departments = Department.select()
+    departments = Department.select().order_by(Department.name)
     return render_template("users.html", users=users, departments=departments)
 
 
-@app.route("/participation/<int:worker>/<int:structure_test>/<int:status>")
-def participation(worker, structure_test, status):
-    if status == 1:
-        Participation.create(worker=worker, structure_test=structure_test)
-    else:
-        Participation.delete().where(worker=worker, structure_test=structure_test)
+@app.route("/set-department-college/<int:college_id>/<int:department_id>")
+def set_department_college(college_id, department_id):
+    if session.get("department_id") != 0:
+        return "", 400
+
+    Department.update(college=college_id).where(
+        Department.id == department_id
+    ).execute()
     return ""
+
+
+@app.route("/participation/<int:worker_id>/<int:structure_test_id>/<int:status>")
+def participation(worker_id, structure_test_id, status):
+    worker = Worker.get(Worker.id == worker_id)
+    if (
+        session.get("department_id") == worker.department_id
+        or session.get("department_id") == 0
+    ):
+        if status == 1:
+            Participation.create(worker=worker_id, structure_test=structure_test_id)
+        else:
+            Participation.delete().where(
+                Participation.worker == worker_id,
+                Participation.structure_test == structure_test_id,
+            )
+        return ""
+    else:
+        return "", 400
 
 
 @app.route("/logout/")
@@ -280,26 +339,53 @@ def logout():
     return redirect(url_for("homepage"))
 
 
-def parse_csv():
-    with open("roster.csv", newline="") as csvfile:
-        reader = csv.DictReader(csvfile, delimiter=";")
+@app.route("/upload_record", methods=["GET", "POST"])
+@login_required
+def upload_record():
+    new_workers = []
+    if request.method == "POST":
+        if "record" not in request.files:
+            flash("Missing file")
+            return redirect(request.url)
+        record = request.files["record"]
+
+        if record.filename == "":
+            flash("No selected file")
+            return redirect(request.url)
+
+        if not record.filename.lower().endswith(".csv"):
+            flash("Wrong filetye, convert to CSV please")
+            return redirect(request.url)
+
+        if record:
+            parse_csv(record)
+            new_workers = (
+                Worker.select(Worker, Department)
+                .join(Department, on=(Worker.department_id == Department.id))
+                .where(Worker.updated == date.today())
+            )
+            flash(f"Found {len(new_workers)} new workers")
+
+    return render_template("upload_record.html", new_workers=new_workers)
+
+
+def parse_csv(csv_file_b):
+    with io.TextIOWrapper(csv_file_b, encoding="utf-8") as csv_file:
+        reader = csv.DictReader(csv_file, delimiter=";")
 
         for row in reader:
-            print(row)
-            department, created = Department.get_or_create(
+            department, _ = Department.get_or_create(
                 name=row["Dept ID Desc"].title(),
                 slug=slugify(row["Dept ID Desc"]),
             )
-            if created:
-                print(slugify(row["Dept ID Desc"]))
-            # flash(f"New Department added: {department.name}")
-            Worker.get_or_create(
+
+            worker, created = Worker.get_or_create(
                 name=row["Name"],
                 contract=row["Job Code"],
                 department_id=department.id,
                 unit=row["Unit"],
-                updated=date.today(),
             )
+            worker.update(updated=date.today())
 
 
 if __name__ == "__main__":
@@ -313,9 +399,8 @@ if __name__ == "__main__":
         User.get_or_create(
             email="admin@admin.com",
             password=sha256("admin".encode("utf-8")).hexdigest(),
-            department_id=0,
+            department=0,
         )
-        parse_csv()
 
     Participation.get_or_create(worker=625, structure_test=1)
     Participation.get_or_create(worker=625, structure_test=2)

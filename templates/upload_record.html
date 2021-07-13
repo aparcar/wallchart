@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Upload contract record</h2>
+<form method=post enctype=multipart/form-data>
+	<input type=file name=record>
+	<input type=submit value=Upload>
+</form>
+
+{% for department_name, workers in new_workers | groupby("department.name") %}
+<h3>
+	{{ department_name }}
+</h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Unit</th>
+		<th>Contract</th>
+	</tr>
+	{% for worker in workers %}
+	<tr>
+		<td>{{ worker.name }}</td>
+		<td>{{ worker.unit }}</td>
+		<td>{{ worker.contract }}</td>
+	</tr>
+	{% endfor %}
+</table>
+{% endfor %}
+{% endblock %}

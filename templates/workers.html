@@ -1,13 +1,34 @@
 {% extends "layout.html" %}
 {% block body %}
 <h2>Workers {% if department %} in {{ department.name }} {% endif %}({{ worker_count }})</h2>
+{% if session.department_id == 0 %}
+<select name="department" onchange="setDepartmentCollege(this);">
+	<option value="">None</option>
+	{%- for college in colleges %}
+	<option value="{{ college.id }}"
+		{% if department.college.id == college.id %}selected="selected"{% endif %}
+		>
+	{{- college.name -}}
+	</option>
+	{%- endfor %}
+</select>
+{% endif %}
+<p>
+Chair: {{ department.chair | join(', ', attribute="email") or "None" }}
+</p>
 <script>
 	function toggleParticipation(element) {
-			console.log(element)
 			fetch("/participation/" +
 					element.dataset.worker + "/" +
 					element.dataset.structure_test + "/" +
-					(element.checked ? 1 : 0)).then(response => console.log(response));
+					(element.checked ? 1 : 0))
+				.then(response => console.log(response));
+		}
+	function setDepartmentCollege(element) {
+			console.log(element)
+			fetch("/set-department-college/" + element.value + "/{{ department.id }}")
+				.then(response => console.log(response));
+
 		}
 </script>
 <table>
@@ -18,7 +39,7 @@
 		<th>E-Mail</th>
 		<th>Phone</th>
 		{% for structure_test in structure_test_list %}
-		<th>{{ structure_test.name }}</th>
+		<th><abbr title="{{ structure_test.description }}">{{ structure_test.name }}</abbr></th>
 		{% endfor %}
 
 	</tr>
@@ -30,7 +51,7 @@
 	{{ participation.append(participated.participation.structure_test_id) or "" }}
 	{% endif %}
 	{% endfor %}
-	<tr>
+	<tr {% if worker.updated != last_updated %}class="worker-inactive"{% endif %}>
 		<td>
 			<a href="/workers/edit/{{ worker.id }}">
 				{{ worker.name }}
@@ -39,7 +60,7 @@
 		<td>{{ worker.unit }}</td>
 		<td>{{ worker.contract }}</td>
 		<td>{% if worker.email %}<a href="mailto:{{ worker.email }}">{{ worker.email }}</a>{% else %}Unknown{% endif %}</td>
-		<td>{{ worker.phone | default("Unknown") }}</td>
+		<td>{{ worker.phone or "Unknown" }}</td>
 		{% for structure_test in structure_test_list %}
 		<th>
 			<input
