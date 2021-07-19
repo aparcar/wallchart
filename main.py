@@ -54,6 +54,8 @@ class BaseModel(Model):
 
 class Worker(BaseModel):
     name = CharField()
+    preferred_name = CharField(null=True)
+    pronouns = CharField(null=True)
     email = CharField(unique=True, null=True)
     phone = IntegerField(unique=True, null=True)
     notes = TextField(null=True)
