@@ -54,6 +54,8 @@ class BaseModel(Model):
 
 class Worker(BaseModel):
     name = CharField()
+    preferred_name = CharField(null=True)
+    pronouns = CharField(null=True)
     email = CharField(unique=True, null=True)
     phone = IntegerField(unique=True, null=True)
     notes = TextField(null=True)
@@ -262,6 +264,8 @@ def workers_edit(worker_id):
     if request.method == "POST":
         Worker.update(
             {
+                Worker.preferred_name: request.form["preferred_name"],
+                Worker.pronouns: request.form["pronouns"],
                 Worker.email: request.form["email"],
                 Worker.phone: request.form["phone"],
                 Worker.notes: request.form["notes"],

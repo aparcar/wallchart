@@ -3,10 +3,23 @@
 <h2>Create</h2>
 <form action="/workers/edit/{{ worker.id }}" method=post>
 	<h3>
-	Worker {{ worker.name }}
+	Worker
+	{%- if worker.preferred_name %}
+	{{ worker.preferred_name }} ({{ worker.name }})
+	{% else %}
+	{{ worker.name }}
+	{% endif %}
 	</h3>
 	<p>
 	<p>Added since {{ worker.added }}, last known contract from {{ worker.updated }}<p>
+	<p>
+	<label for="preferred_name">Preferred name</label>
+	<input name="preferred_name" type="text" value="{{ worker.preferred_name or "" }}" placeholder="{{ worker.name }}" />
+	</p>
+	<p>
+	<label for="pronouns">Pronouns</label>
+	<input name="pronouns" type="text" value="{{ worker.pronouns or ""}}" placeholder="gender is a spectrum" />
+	</p>
 	<label for="email">E-Mail</label>
 	<input name="email" type="text" value="{{ worker.email or "" }}" placeholder="worker@email.com" />
 	</p>
