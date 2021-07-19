@@ -26,6 +26,10 @@
 	<label for="notes">Notes</label>
 	<textarea name="notes">{{ worker.notes or "" }}</textarea>
 	</p>
+	<p>
+	<label for="active">Active (uncheck if worker graduated or is otherwise not currently associated with the university)</label>
+	<input name="active" type="checkbox" value=True {{'checked="checked"' if worker.active else ""}}/>
+	</p>
 	<input type="submit" value="Update data" />
 </form>
 {% endblock %}
