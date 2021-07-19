@@ -269,6 +269,7 @@ def workers_edit(worker_id):
                 Worker.email: request.form["email"],
                 Worker.phone: request.form["phone"],
                 Worker.notes: request.form["notes"],
+                Worker.active: bool(request.form.get("active")),
             }
         ).where(Worker.id == worker_id).execute()
         flash("Worker data updated")
