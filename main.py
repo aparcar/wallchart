@@ -282,7 +282,7 @@ def workers_edit(worker_id):
     current_dept = Department.get(worker.department_id == Department.id).name
 
     try:
-        org_dept = Department.get(worker.organizing_department_id == Department.id).name
+        org_dept = Department.get(worker.organizing_dept_id == Department.id).name
     except Department.DoesNotExist:
         org_dept = current_dept
 
