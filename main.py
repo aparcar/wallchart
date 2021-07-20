@@ -266,8 +266,8 @@ def workers_edit(worker_id):
             {
                 Worker.preferred_name: request.form["preferred_name"],
                 Worker.pronouns: request.form["pronouns"],
-                Worker.email: request.form["email"],
-                Worker.phone: request.form["phone"],
+                Worker.email: request.form["email"] or None,
+                Worker.phone: request.form["phone"] or None,
                 Worker.notes: request.form["notes"],
                 Worker.active: bool(request.form.get("active")),
             }
