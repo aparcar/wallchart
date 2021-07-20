@@ -62,6 +62,7 @@ class Worker(BaseModel):
     contract = CharField()
     unit = CharField()
     department_id = IntegerField()
+    organizing_dept_id = IntegerField(null=True)
     active = BooleanField(default=True)
     added = DateField(default=date.today)
     updated = DateField(default=date.today)
@@ -270,12 +271,22 @@ def workers_edit(worker_id):
                 Worker.phone: request.form["phone"] or None,
                 Worker.notes: request.form["notes"],
                 Worker.active: bool(request.form.get("active")),
+                Worker.organizing_dept_id: Department.get(request.form["organizing_dept"] == Department.name).id,
             }
         ).where(Worker.id == worker_id).execute()
         flash("Worker data updated")
 
+    dept_list = [dept.name for dept in Department.select().order_by(Department.name)]
+
     worker = Worker.get(Worker.id == worker_id)
-    return render_template("workers_edit.html", worker=worker)
+    current_dept = Department.get(worker.department_id == Department.id).name
+
+    try:
+        org_dept = Department.get(worker.organizing_department_id == Department.id).name
+    except Department.DoesNotExist:
+        org_dept = current_dept
+
+    return render_template("workers_edit.html", worker=worker, dept=current_dept, org_dept=org_dept, dept_list=dept_list)
 
 
 @app.route("/users/", methods=["GET", "POST"])
