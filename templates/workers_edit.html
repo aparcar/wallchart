@@ -28,6 +28,19 @@
 	<input name="phone" type="text" value="{{ worker.phone or ""}}" placeholder="18081234567" />
 	</p>
 	<p>
+	<label for="dept">Department</label>
+	<input name="dept" type="text" value="{{dept}}" disabled />
+	</p>
+	<p>
+	<label for="organizing_dept">Organizing department</label>
+	<select name="organizing_dept" method="GET" action="/">
+		<option value="{{org_dept}}" selected>{{org_dept}}</option>
+		{% for department in dept_list %}
+			<option value="{{department}}">{{department}}</option>
+		{% endfor %}
+	</select>
+	</p>
+	<p>
 	<label for="notes">Notes</label>
 	<textarea name="notes">{{ worker.notes or "" }}</textarea>
 	</p>
