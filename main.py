@@ -222,7 +222,7 @@ def workers(department_slug=None):
     workers = (
         Worker.select(Worker, Participation)
         .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
-        .where(Worker.department_id == department.id)
+        .where(Worker.organizing_dept_id == department.id)
         .order_by(Worker.name)
     )
 
