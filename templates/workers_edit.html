@@ -32,6 +32,7 @@
 	<input name="dept" type="text"
 		value="{{ Department.get_by_id(worker.department_id).name }}" disabled />
 	</p>
+	{% if session.department_id == 0 %}
 	<p>
 	<label for="organizing_dept">Organizing department</label>
 	<select name="organizing_dept">
@@ -47,6 +48,7 @@
 		{% endfor %}
 	</select>
 	</p>
+	{% endif %}
 	<p>
 	<label for="notes">Notes</label>
 	<textarea name="notes">{{ worker.notes or "" }}</textarea>
