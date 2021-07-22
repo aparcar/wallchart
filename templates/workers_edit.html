@@ -28,6 +28,26 @@
 	<input name="phone" type="text" value="{{ worker.phone or ""}}" placeholder="18081234567" />
 	</p>
 	<p>
+	<label for="dept">Department</label>
+	<input name="dept" type="text"
+		value="{{ Department.get_by_id(worker.department_id).name }}" disabled />
+	</p>
+	<p>
+	<label for="organizing_dept">Organizing department</label>
+	<select name="organizing_dept">
+		{% for department in Department.select().order_by(Department.name) %}
+		<option
+			value="{{ department.id }}"
+			{%- if worker.organizing_dept_id == department.id %}
+			selected="selected"
+			{% endif %}
+			>
+			{{ department.name }}
+		</option>
+		{% endfor %}
+	</select>
+	</p>
+	<p>
 	<label for="notes">Notes</label>
 	<textarea name="notes">{{ worker.notes or "" }}</textarea>
 	</p>

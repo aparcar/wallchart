@@ -62,6 +62,7 @@ class Worker(BaseModel):
     contract = CharField()
     unit = CharField()
     department_id = IntegerField()
+    organizing_dept_id = IntegerField()
     active = BooleanField(default=True)
     added = DateField(default=date.today)
     updated = DateField(default=date.today)
@@ -270,12 +271,13 @@ def workers_edit(worker_id):
                 Worker.phone: request.form["phone"] or None,
                 Worker.notes: request.form["notes"],
                 Worker.active: bool(request.form.get("active")),
+                Worker.organizing_dept_id: request.form["organizing_dept"],
             }
         ).where(Worker.id == worker_id).execute()
         flash("Worker data updated")
 
     worker = Worker.get(Worker.id == worker_id)
-    return render_template("workers_edit.html", worker=worker)
+    return render_template("workers_edit.html", worker=worker, Department=Department)
 
 
 @app.route("/users/", methods=["GET", "POST"])
@@ -388,6 +390,8 @@ def parse_csv(csv_file_b):
                 name=row["Name"],
                 contract=row["Job Code"],
                 department_id=department.id,
+                # default organizing_dept to department ID, can be changed later on
+                organizing_dept_id=department.id,
                 unit=row["Unit"],
             )
             worker.update(updated=date.today())
