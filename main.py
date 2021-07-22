@@ -263,17 +263,21 @@ def structure_tests():
 @login_required
 def workers_edit(worker_id):
     if request.method == "POST":
-        Worker.update(
-            {
-                Worker.preferred_name: request.form["preferred_name"],
-                Worker.pronouns: request.form["pronouns"],
-                Worker.email: request.form["email"] or None,
-                Worker.phone: request.form["phone"] or None,
-                Worker.notes: request.form["notes"],
-                Worker.active: bool(request.form.get("active")),
-                Worker.organizing_dept_id: request.form["organizing_dept"],
-            }
-        ).where(Worker.id == worker_id).execute()
+
+        update = {
+            Worker.preferred_name: request.form["preferred_name"],
+            Worker.pronouns: request.form["pronouns"],
+            Worker.email: request.form["email"] or None,
+            Worker.phone: request.form["phone"] or None,
+            Worker.notes: request.form["notes"],
+            Worker.active: bool(request.form.get("active")),
+        }
+
+        # only admins can switch worker departments
+        if session.get("department_id") == 0:
+            update[Worker.organizing_dept_id] = request.form["organizing_dept"]
+
+        Worker.update(update).where(Worker.id == worker_id).execute()
         flash("Worker data updated")
 
     worker = Worker.get(Worker.id == worker_id)
