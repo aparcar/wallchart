@@ -2,17 +2,17 @@
 {% block body %}
 <h2>Users</h2>
 <p>
-Create colleges.
+Create units.
 </p>
 <h3>
-	Existing colleges
+	Existing units
 </h3>
 <ul>
-	{% for college in colleges %}
-	<li>{{ college.name }}</li>
-	{% if college.departments %}
+	{% for unit in units %}
+	<li>{{ unit.name }}</li>
+	{% if unit.departments %}
 	<ul>
-		{% for department in college.departments %}
+		{% for department in unit.departments %}
 		<li><a href="{{ url_for("workers", department_slug=department.slug) }}">
 				{{ department.name }}
 				<a/>
@@ -25,12 +25,12 @@ Create colleges.
 </ul>
 
 <h3>
-	Create new college
+	Create new unit
 </h3>
-<form action="{{ url_for("colleges") }}" method=post>
+<form action="{{ url_for("units") }}" method=post>
 	<label for="name">Name</label>
 	<input name="name" type="text" value="" />
-	<input type="submit" value="Create college" />
+	<input type="submit" value="Create unit" />
 </form>
 
 {% endblock %}

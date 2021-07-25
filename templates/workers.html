@@ -2,13 +2,13 @@
 {% block body %}
 <h2>Workers {% if department %} in {{ department.name }} {% endif %}({{ worker_count }})</h2>
 {% if session.department_id == 0 %}
-<select name="department" onchange="setDepartmentCollege(this);">
+<select name="department" onchange="setDepartmentUnit(this);">
 	<option value="">None</option>
-	{%- for college in colleges %}
-	<option value="{{ college.id }}"
-		{% if department.college.id == college.id %}selected="selected"{% endif %}
+	{%- for unit in units %}
+	<option value="{{ unit.id }}"
+		{% if department.unit.id == unit.id %}selected="selected"{% endif %}
 		>
-	{{- college.name -}}
+	{{- unit.name -}}
 	</option>
 	{%- endfor %}
 </select>
@@ -24,9 +24,9 @@ Chair: {{ department.chair | join(', ', attribute="email") or "None" }}
 					(element.checked ? 1 : 0))
 				.then(response => console.log(response));
 		}
-	function setDepartmentCollege(element) {
+	function setDepartmentUnit(element) {
 			console.log(element)
-			fetch("/set-department-college/" + element.value + "/{{ department.id }}")
+			fetch("/set-department-unit/" + element.value + "/{{ department.id }}")
 				.then(response => console.log(response));
 
 		}

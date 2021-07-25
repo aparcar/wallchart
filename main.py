@@ -71,7 +71,7 @@ class Worker(BaseModel):
         indexes = ((("name", "unit", "department_id", "contract"), True),)
 
 
-class College(BaseModel):
+class Unit(BaseModel):
     name = CharField(unique=True)
     slug = CharField()
 
@@ -79,7 +79,7 @@ class College(BaseModel):
 class Department(BaseModel):
     name = CharField(unique=True)
     slug = CharField()
-    college = ForeignKeyField(College, backref="departments", null=True)
+    unit = ForeignKeyField(Unit, backref="departments", null=True)
 
 
 class User(BaseModel):
@@ -103,7 +103,7 @@ class Participation(BaseModel):
 def create_tables():
     with database:
         database.create_tables(
-            [Worker, College, Department, User, StructureTest, Participation]
+            [Worker, Unit, Department, User, StructureTest, Participation]
         )
 
 
@@ -183,18 +183,18 @@ def login():
     return render_template("login.html")
 
 
-@app.route("/colleges/", methods=["GET", "POST"])
+@app.route("/units/", methods=["GET", "POST"])
 @login_required
-def colleges():
+def units():
     if request.method == "POST":
-        College.create(
+        Unit.create(
             name=request.form["name"],
             slug=slugify(request.form["name"]),
         )
-        flash("College created")
+        flash("Unit created")
 
-    colleges = College.select().group_by(College.name)
-    return render_template("colleges.html", colleges=colleges)
+    units = Unit.select().group_by(Unit.name)
+    return render_template("units.html", units=units)
 
 
 @app.route("/departments/")
@@ -227,7 +227,7 @@ def workers(department_slug=None):
     )
 
     last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
-    colleges = College.select().order_by(College.name)
+    units = Unit.select().order_by(Unit.name)
 
     structure_tests = StructureTest.select().order_by(StructureTest.added)
 
@@ -239,7 +239,7 @@ def workers(department_slug=None):
         department=department,
         structure_test_list=structure_tests,
         last_updated=last_updated,
-        colleges=colleges,
+        units=units,
     )
 
 
@@ -313,12 +313,12 @@ def users():
     return render_template("users.html", users=users, departments=departments)
 
 
-@app.route("/set-department-college/<int:college_id>/<int:department_id>")
-def set_department_college(college_id, department_id):
+@app.route("/set-department-unit/<int:unit_id>/<int:department_id>")
+def set_department_unit(unit_id, department_id):
     if session.get("department_id") != 0:
         return "", 400
 
-    Department.update(college=college_id).where(
+    Department.update(unit=unit_id).where(
         Department.id == department_id
     ).execute()
     return ""
@@ -328,7 +328,7 @@ def set_department_college(college_id, department_id):
 def participation(worker_id, structure_test_id, status):
     worker = Worker.get(Worker.id == worker_id)
     if (
-        session.get("department_id") == worker.department_id
+        session.get("department_id") == worker.organizing_dept_id
         or session.get("department_id") == 0
     ):
         if status == 1:
