@@ -1,17 +1,73 @@
-<!doctype html>
-<title>Wall Chart</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-<div class=page>
-	<h1><a href="{{ url_for('homepage') }}">Wall Charts</a></h1>
-	<div class=metanav>
-		{% if not session.logged_in %}
-		<a href="{{ url_for('login') }}">log in</a>
-		{% else %}
-		<a href="{{ url_for('logout') }}">log out</a>
-		{% endif %}
-	</div>
-	{% for message in get_flashed_messages() %}
-	<div class=flash>{{ message }}</div>
-	{% endfor %}
-	{% block body %}{% endblock %}
-</div>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Wall Chart</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static',
+    filename='style.css') }}">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="page container">
+      <div class="d-flex flex-column">
+        <div class="d-flex justify-content-end">
+          <div class="metanav">
+            {% if not session.logged_in %}
+            <button class="btn btn-outline-secondary btn-sm">
+              <a href="{{ url_for('login') }}">Log in</a>
+              {% else %}
+              <a href="{{ url_for('logout') }}">Log out</a>
+            </button>
+            {% endif %}
+          </div>
+        </div>
+        <ul class="nav">
+          <li class="nav-item">
+            {% if session.logged_in %}
+            <a
+              class="nav-link active"
+              aria-current="page"
+              href="{{ url_for('homepage') }} "
+              >Home</a
+            >
+          </li>
+          {% endif %} {% if session.department_id == 0 %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('structure_tests') }}">
+              Structure Tests</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('departments') }}">
+              Departments</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('units') }}"> Manage Units</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('users') }}"> Manage Users</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('upload_record') }}">
+              Upload Record</a
+            >
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+      <h1>Wall Charts</h1>
+
+      {% for message in get_flashed_messages() %}
+      <div class="flash">{{ message }}</div>
+      {% endfor %} {% block body %}{% endblock %}
+    </div>
+  </body>
+</html>
