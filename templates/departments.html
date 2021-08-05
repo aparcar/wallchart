@@ -6,7 +6,7 @@
 		<th>Name</th>
 		<th>Chair</th>
 	</tr>
-	{% for department in department_list %}
+	{% for department in departments %}
 	<tr>
 		<td>
 			<a href="/workers/{{ department.slug }}">
@@ -17,5 +17,4 @@
 	</tr>
 	{% endfor %}
 </table>
-{% include "includes/pagination.html" %}
 {% endblock %}

@@ -38,15 +38,15 @@ Chair: {{ department.chair | join(', ', attribute="email") or "None" }}
 		<th>Contract</th>
 		<th>E-Mail</th>
 		<th>Phone</th>
-		{% for structure_test in structure_test_list %}
+		{% for structure_test in structure_tests %}
 		<th><abbr title="{{ structure_test.description }}">{{ structure_test.name }}</abbr></th>
 		{% endfor %}
 
 	</tr>
-	{% for _, worker_list in worker_list | groupby("id") %}
-	{% set worker = worker_list[0] %}
+	{% for _, workers in workers | groupby("id") %}
+	{% set worker = workers[0] %}
 	{% set participation = [] %}
-	{% for participated in worker_list %}
+	{% for participated in workers %}
 	{% if participated.participation %}
 	{{ participation.append(participated.participation.structure_test_id) or "" }}
 	{% endif %}
@@ -61,7 +61,7 @@ Chair: {{ department.chair | join(', ', attribute="email") or "None" }}
 		<td>{{ worker.contract }}</td>
 		<td>{% if worker.email %}<a href="mailto:{{ worker.email }}">{{ worker.email }}</a>{% else %}Unknown{% endif %}</td>
 		<td>{{ worker.phone or "Unknown" }}</td>
-		{% for structure_test in structure_test_list %}
+		{% for structure_test in structure_tests %}
 		<th>
 			<input
 				type="checkbox"
@@ -76,5 +76,4 @@ Chair: {{ department.chair | join(', ', attribute="email") or "None" }}
 	</tr>
 	{% endfor %}
 </table>
-{% include "includes/pagination.html" %}
 {% endblock %}

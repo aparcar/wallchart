@@ -142,15 +142,6 @@ def after_request(response):
     return response
 
 
-def object_list(template_name, qr, var_name="object_list", **kwargs):
-    entries_per_page = 30
-    kwargs.update(
-        page=int(request.args.get("page", 1)), pages=qr.count() / entries_per_page + 1
-    )
-    kwargs[var_name] = qr.paginate(kwargs["page"], entries_per_page)
-    return render_template(template_name, **kwargs)
-
-
 @app.route("/")
 def homepage():
     if session.get("logged_in"):
@@ -202,10 +193,9 @@ def units():
 def departments():
     departments = Department.select().order_by(Department.name)
     department_count = len(departments)
-    return object_list(
+    return render_template(
         "departments.html",
-        departments,
-        "department_list",
+        departments=departments,
         department_count=department_count,
     )
 
@@ -231,13 +221,12 @@ def workers(department_slug=None):
 
     structure_tests = StructureTest.select().order_by(StructureTest.added)
 
-    return object_list(
+    return render_template(
         "workers.html",
-        workers,
-        "worker_list",
+        workers=workers,
         worker_count=len(workers),
         department=department,
-        structure_test_list=structure_tests,
+        structure_tests=structure_tests,
         last_updated=last_updated,
         units=units,
     )
@@ -256,7 +245,7 @@ def structure_tests():
             flash("Structure test already exists")
 
     structure_tests = StructureTest.select().order_by(StructureTest.added)
-    return object_list("structure_tests.html", structure_tests, "structure_tests_list")
+    return render_template("structure_tests.html", structure_tests=structure_tests)
 
 
 @app.route("/workers/edit/<int:worker_id>", methods=["GET", "POST"])
@@ -318,9 +307,7 @@ def set_department_unit(unit_id, department_id):
     if session.get("department_id") != 0:
         return "", 400
 
-    Department.update(unit=unit_id).where(
-        Department.id == department_id
-    ).execute()
+    Department.update(unit=unit_id).where(Department.id == department_id).execute()
     return ""
 
 
