@@ -332,7 +332,7 @@ def participation(worker_id, structure_test_id, status):
 
 @app.route("/logout/")
 def logout():
-    session.pop("logged_in", None)
+    session.clear()
     flash("You were logged out")
     return redirect(url_for("homepage"))
 
