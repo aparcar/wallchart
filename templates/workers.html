@@ -39,10 +39,9 @@ Chair: {{ department.chair | join(', ', attribute="email") or "None" }}
 			<th scope="col">Contract</th>
 			<th scope="col">E-Mail</th>
 			<th scope="col">Phone</th>
-			{% for structure_test in structure_test_list %}
+			{% for structure_test in structure_tests %}
 			<th scope="col"><abbr title="{{ structure_test.description }}">{{ structure_test.name }}</abbr></th>
-			{% endfor %}
-
+		{% endfor %}
 		</tr>
 	</thead>
 	<tbody>
