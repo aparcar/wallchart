@@ -99,6 +99,7 @@ class StructureTest(BaseModel):
 class Participation(BaseModel):
     worker = ForeignKeyField(Worker, field="id")
     structure_test = ForeignKeyField(StructureTest)
+    added = DateField(default=date.today)
 
 
 def create_tables():
@@ -158,9 +159,9 @@ def homepage():
 def admin():
     return render_template("admin.html")
 
-@app.route("/search_worker")
-def search_worker():
-    return render_template("search_worker.html")
+@app.route("/find_worker")
+def find_worker():
+    return render_template("find_worker.html")
 
 @app.route("/login/", methods=["GET", "POST"])
 def login():
@@ -238,8 +239,17 @@ def workers(department_slug=None):
 @app.route("/api/workers")
 @login_required
 def api_workers():
-    return jsonify(list(Worker.select().dicts()))
+    return jsonify(list(Worker.select(Worker, Department.slug.alias("department_slug"), Department.name.alias('department_name')).join(Department, on=(Worker.organizing_dept_id == Department.id)).dicts()))
 
+@app.route("/api/participation")
+@login_required
+def api_participation():
+    return jsonify(list(Participation.select().dicts()))
+
+@app.route("/api/departments")
+@login_required
+def api_departments():
+    return jsonify(list(Department.select().dicts()))
 
 @app.route("/structure_tests", methods=["GET", "POST"])
 @login_required
