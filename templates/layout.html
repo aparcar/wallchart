@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <title>Wall Charts</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static',
     filename='style.css') }}">
@@ -15,59 +14,57 @@
     />
   </head>
   <body>
-	  {% if session.logged_in %}
-      <nav
-	  class="navbar navbar-light sticky-top"
-	  style="background-color: #e3f2fd"
+    {% if session.logged_in %}
+    <nav
+      class="navbar navbar-light sticky-top"
+      style="background-color: #e3f2fd"
+    >
+	<div class="container">
+
+      <a class="nav-link" href="{{ url_for('homepage') }} ">Wall Charts</a>
+      {% endif %} {% if session.department_id == 0 %}
+      <a class="nav-link" href="{{ url_for('structure_tests') }}">
+        Structure Tests</a
       >
-	  <a class="nav-link" href="{{ url_for('homepage') }} ">Wall Charts</a>
-	  {% endif %} {% if session.department_id == 0 %}
-	  <a class="nav-link" href="{{ url_for('structure_tests') }}">
-		  Structure Tests</a
-		  >
-		  <a class="nav-link" href="{{ url_for('departments') }}"> Departments</a>
-		  <a class="nav-link" href="{{ url_for('units') }}"> Manage Units</a>
-		  <a class="nav-link" href="{{ url_for('users') }}"> Manage Users</a>
-		  <a class="nav-link" href="{{ url_for('upload_record') }}">
-			  Upload Record</a
-			  >
-			  {% endif %}
-			</nav>
-			
-			<div class="d-flex justify-content-end p-3">
-				{% if not session.logged_in %}
-				<a href="{{ url_for('login') }}">Log in</a>
-				{% else %}
-				<a href="{{ url_for('logout') }}">Log out</a>
-				
-				{% endif %}
-			</div>
-			<div class="page container">
-			
-			{% for message in get_flashed_messages() %}
-			<div class="alert alert-primary">{{ message }}</div>
-			{% endfor %} {% block body %}{% endblock %}
-			
-		</div>
-		
-		
-	</body>
-	<script>
-		const thisLocation = window.location;
-		const navLinks = Array.from(document.querySelectorAll(".nav-link"));
-		navLinks.map((link, index) => {
-      if (thisLocation.href === "/") {
-        navLinks[0].classList.add("active");
+      <a class="nav-link" href="{{ url_for('departments') }}"> Departments</a>
+      <a class="nav-link" href="{{ url_for('units') }}"> Manage Units</a>
+      <a class="nav-link" href="{{ url_for('users') }}"> Manage Users</a>
+      <a class="nav-link" href="{{ url_for('upload_record') }}">
+        Upload Record</a
+      >
+      {% endif %}
+
+	  <div class="d-flex justify-content-end p-3">
+		{% if not session.logged_in %}
+		<a href="{{ url_for('login') }}">Log in</a>
+		{% else %}
+		<a href="{{ url_for('logout') }}">Log out</a>
+  
+		{% endif %}
+	  </div>
+
+	</div>
+
+    </nav>
+
+   
+    <div class="page container">
+      {% for message in get_flashed_messages() %}
+      <div class="alert alert-primary">{{ message }}</div>
+      {% endfor %} {% block body %}{% endblock %}
+    </div>
+  </body>
+  <script>
+    const currentLocation = window.location;
+    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+    navLinks.map((link, index) => {
+      if (currentLocation.href === "/") {
+        navLinks[0].classList.add("active", "text-decoration-underline");
         navLinks[0].setAttribute("aria-current", "page");
-        navLinks[0].classList.add("text-decoration-underline");
-      } else if (
-        thisLocation.href !== "/" &&
-        thisLocation.href.includes(link.href)
-      ) {
-        navLinks[0].classList.remove("text-decoration-underline");
-        navLinks[index].classList.add("active");
+      } else if (currentLocation.href.includes(link.href)) {
+        navLinks[0].classList.remove("text-decoration-underline", "active");
+        navLinks[index].classList.add("active", "text-decoration-underline");
         navLinks[index].setAttribute("aria-current", "page");
-        navLinks[index].classList.add("text-decoration-underline");
       }
     });
   </script>

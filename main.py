@@ -158,6 +158,9 @@ def homepage():
 def admin():
     return render_template("admin.html")
 
+@app.route("/search_worker")
+def search_worker():
+    return render_template("search_worker.html")
 
 @app.route("/login/", methods=["GET", "POST"])
 def login():
