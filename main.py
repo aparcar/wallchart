@@ -99,7 +99,6 @@ class StructureTest(BaseModel):
 class Participation(BaseModel):
     worker = ForeignKeyField(Worker, field="id")
     structure_test = ForeignKeyField(StructureTest)
-    added = DateField(default=date.today)
 
 
 def create_tables():

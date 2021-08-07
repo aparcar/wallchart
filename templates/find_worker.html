@@ -30,10 +30,8 @@
       console.log(error);
     })
     .then(function (data) {
-      const inputField = document.querySelector(".input");
       const input = document.querySelector("input");
 
-      inputField.appendChild(input  );
       input.addEventListener("input", (e) => runSearch(e));
 
       function runSearch(e) {
