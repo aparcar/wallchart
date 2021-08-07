@@ -20,6 +20,7 @@ from flask import redirect
 from flask import url_for
 from flask import request
 from flask import render_template
+from flask import jsonify
 
 from functools import wraps
 from hashlib import sha256
@@ -230,6 +231,11 @@ def workers(department_slug=None):
         last_updated=last_updated,
         units=units,
     )
+
+@app.route("/api/workers")
+@login_required
+def api_workers():
+    return jsonify(list(Worker.select().dicts()))
 
 
 @app.route("/structure_tests", methods=["GET", "POST"])
