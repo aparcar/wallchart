@@ -5,6 +5,7 @@
   <label for="find_worker" class="form-label"
     >Type to search for a Worker:</label
   >
+  <input id="find_worker" class="form-control" type="search" placeholder="Name, email or phone"></input>
 </div>
 <div class="table-container"></div>
 
@@ -17,15 +18,12 @@
     isSearching: false,
     foundResults: [],
     searchString: "",
-    response: [],
   };
 
   const request = axios
     .get(endpoint)
     .then((response) => {
       const data = response.data;
-
-      console.log(response);
       return data;
     })
     .catch(function (error) {
@@ -33,14 +31,9 @@
     })
     .then(function (data) {
       const inputField = document.querySelector(".input");
-
-      inputField.appendChild(document.createElement("input"));
       const input = document.querySelector("input");
-      input.setAttribute("placeholder", "Name, phone or email");
-      input.setAttribute("type", "search");
-      input.classList.add("form-control");
-      input.id = "find_worker";
 
+      inputField.appendChild(input  );
       input.addEventListener("input", (e) => runSearch(e));
 
       function runSearch(e) {
@@ -53,7 +46,7 @@
           keys: ["name", "phone", "email"],
         });
 
-        state.searchString = searchString;
+        state.searchString = searchString.trim();
 
         state.foundResults = Array.from(fuse.search(searchString));
 
@@ -63,7 +56,6 @@
       }
 
       function dispatch(state) {
-        console.log(state);
         if (state.isSearching) {
           generateHtml(state);
         }
@@ -71,13 +63,17 @@
 
       function generateHtml(state) {
         const tableContainer = document.querySelector(".table-container");
-
-        if (state.searchString === "" || !state.foundResults.length) {
+        if (!state.searchString) {
           tableContainer.innerHTML = "";
           state.isSearching = false;
           dispatch(state);
         }
-        if (state.foundResults.length) {
+        if (!state.foundResults.length && state.searchString !== ""){
+          tableContainer.innerHTML = "No results, please refine your search.";
+          state.isSearching = false;
+          dispatch(state);
+        }
+        if (state.foundResults.length && state.searchString) {
           state.foundResults = state.foundResults.slice(0, 10);
           const html = `
     <table class="table table-striped table-hover">
