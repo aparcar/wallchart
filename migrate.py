@@ -1,5 +1,6 @@
-from playhouse.migrate import *
 from datetime import date
+
+from playhouse.migrate import *
 
 db = SqliteDatabase("wallcharts.db")
 migrator = SqliteMigrator(db)

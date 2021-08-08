@@ -2,15 +2,19 @@ import configparser
 import csv
 import io
 import logging
+import random
 from datetime import date
 from functools import wraps
 from hashlib import sha256
 from pathlib import Path
 
+import pandas as pd
 from flask import (
     Flask,
+    Response,
     flash,
     g,
+    json,
     jsonify,
     redirect,
     render_template,
@@ -19,6 +23,8 @@ from flask import (
     session,
     url_for,
 )
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 from peewee import (
     JOIN,
     BooleanField,
@@ -177,7 +183,9 @@ def download_db():
 def admin():
     # select departments but remove the pseudo "admin" department
     department_count = Department.select(fn.count(Department.id)).scalar() - 1
-    worker_count = Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
+    worker_count = (
+        Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
+    )
     return render_template(
         "admin.html", department_count=department_count, worker_count=worker_count
     )
@@ -328,6 +336,23 @@ def department(department_slug=None):
         last_updated=last_updated,
         units=units,
     )
+
+
+@app.route("/api/overview.png")
+@login_required
+def api_bar():
+    df = pd.DataFrame(
+        list(
+            Participation.select(StructureTest.name)
+            .join(StructureTest, on=(Participation.structure_test == StructureTest.id))
+            .dicts()
+        )
+    ).value_counts()
+    output = io.BytesIO()
+    ax = df.plot(kind="barh")
+    ax.figure.savefig(output)
+    return Response(output.getvalue(), mimetype="image/png")
+    # return jsonify(list(df.value_counts()))
 
 
 @app.route("/api/workers")
