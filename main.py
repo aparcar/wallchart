@@ -214,10 +214,18 @@ def workers(department_slug=None):
         department = Department.get(Department.id == session.get("department_id"))
 
     workers = (
-        Worker.select(Worker, Participation)
+        Worker.select(
+            Worker,
+            fn.group_concat(Participation.structure_test)
+            .python_value(
+                lambda idlist: [int(i) for i in (idlist.split(",") if idlist else [])]
+            )
+            .alias("participated"),
+        )
         .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
         .where(Worker.organizing_dept_id == department.id)
-        .order_by(Worker.name)
+        .group_by(Worker.id)
+        .order_by(Worker.name, Participation.structure_test)
     )
 
     last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()

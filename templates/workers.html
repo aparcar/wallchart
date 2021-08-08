@@ -45,14 +45,7 @@ Chair: {{ department.chair | join(', ', attribute="email") or "None" }}
 		</tr>
 	</thead>
 	<tbody>
-	{% for _, workers in workers | groupby("id") %}
-	{% set worker = workers[0] %}
-	{% set participation = [] %}
-	{% for participated in workers %}
-	{% if participated.participation %}
-	{{ participation.append(participated.participation.structure_test_id) or "" }}
-	{% endif %}
-	{% endfor %}
+	{% for worker in workers %}
 	<tr {% if worker.updated != last_updated %}class="worker-inactive"{% endif %}>
 		<td scope="row">
 			<a href="/workers/edit/{{ worker.id }}">
@@ -71,7 +64,7 @@ Chair: {{ department.chair | join(', ', attribute="email") or "None" }}
 				data-structure_test="{{ structure_test.id }}"
 				name="{{ structure_test.name }}"
 				onchange="toggleParticipation(this);"
-				{% if structure_test.id in participation %}checked{% endif %}
+				{% if structure_test.id in worker.participated %}checked{% endif %}
 				>
 		</th>
 			{% endfor %}
