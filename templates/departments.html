@@ -1,20 +1,152 @@
-{% extends "layout.html" %}
-{% block body %}
-<h2 class="p-2 text-left display-5">Departments ({{ department_count }})</h2>
+{% extends "layout.html" %} {% block body %}
+<h2 class="p-2 text-left display-5" id="title">Departments ({{ department_count }})</h2>
+
+<div class="input mb-3">
+	<label for="find_worker" class="form-label">Type to search for a Department:</label>
+	<input id="find_worker" class="form-control" type="search" placeholder="Department Name"></input>
+</div>
+<div class="table-container"></div>
+<!--
 <table class="table table-striped table-hover">
-	<tr>
-		<th scope="col">Name</th>
-		<th scope="col">Chair</th>
-	</tr>
-	{% for department in departments %}
-	<tr>
-		<td>
-			<a href="/workers/{{ department.slug }}">
-				{{ department.name }}
-			</a>
-		</td>
-		<td>{{ department.chair | join(', ', attribute="email") }}</td>
-	</tr>
-	{% endfor %}
+  <tr>
+    <th scope="col">Name</th>
+    <th scope="col">Chair</th>
+  </tr>
+  {% for department in departments %}
+  <tr>
+    <td>
+      <a href="/workers/{{ department.slug }}"> {{ department.name }} </a>
+    </td>
+    <td>{{ department.chair | join(', ', attribute="email") }}</td>
+  </tr>
+  {% endfor %}
+-->
 </table>
+<script src="{{ url_for('static', filename='fuse.js') }}"></script>
+<script src="{{ url_for('static', filename='axios.min.js') }}"></script>
+<script>
+	const endpoint = "/api/departments";
+
+	let state = {
+		isSearching: false,
+		foundResults: [],
+		searchString: "",
+		departmentNumber: ""
+	};
+
+	const request = axios
+		.get(endpoint)
+		.then((response) => {
+			const data = response.data;
+			console.log(data)
+			return data;
+		})
+		.catch(function (error) {
+			console.log(error);
+		})
+		.then(function (data) {
+			generateHtml(state);
+
+			const input = document.querySelector("input");
+
+			input.addEventListener("input", (e) => runSearch(e));
+
+
+			function runSearch(e) {
+				e.preventDefault();
+				const searchString = e.currentTarget.value;
+
+				const fuse = new Fuse(data, {
+					includeScore: true,
+					threshold: 0.5,
+					keys: ["name"],
+				});
+
+				state.searchString = searchString.trim();
+
+				state.foundResults = Array.from(fuse.search(searchString));
+
+				state.isSearching = true;
+
+				dispatch(state);
+			}
+
+			function dispatch(state) {
+				if (state.isSearching) {
+					generateHtml(state);
+				}
+			}
+
+			function generateHtml(state) {
+				const deptNumber = document.getElementById("title")
+				deptNumber.innerText = `Departments (${(!state.searchString) ? data.length : !state.foundResults.length ? 0 : state.foundResults.length})`
+
+				const tableContainer = document.querySelector(".table-container");
+
+				console.log(state.isSearching)
+				if (!state.isSearching || !state.searchString || state.searchString === " ") {
+					const html = `
+    <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+		<th style="width: 50%" scope="col">Name</th>
+    	<th style="width: 50%" scope="col">Chair</th>
+      </tr>
+    </thead>
+    <tbody class="table-row">${data
+							.map(
+								(item) => `
+		  <tr>
+		  <td scope="row">
+			<a href="/workers/${item.slug}">${item.name}</a></td>
+			<td scope="row">
+			${item.chair ? item.chair : "Unknown"}</td>`
+							)
+							.join(" ")}</tbody>
+  	</table>`;
+					state.foundResults = [];
+					state.isSearching = false;
+					state.searchString = "";
+
+					
+					
+					return (tableContainer.innerHTML = html);
+				} else if (state.isSearching && state.foundResults.length) {
+					const html = `
+    <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+		<th scope="col">Name</th>
+    	<th scope="col">Chair</th>
+      </tr>
+    </thead>
+    <tbody class="table-row">${state.foundResults
+							.map(
+								({ item }) => `
+		  <tr>
+		  <td scope="row">
+			<a href="/workers/${item.slug}">${item.name}</a></td>
+			<td scope="row">
+			${item.chair ? item.chair : "Unknown"}</td>`
+							)
+							.join(" ")}</tbody>
+  	</table>`
+					state.foundResults = [];
+					state.isSearching = false;
+					state.searchString = "";
+					return (tableContainer.innerHTML = html);
+				} else if (state.isSearching && !state.foundResults.length) {
+					const html =
+						`<p> No results, please refine your search </p>`
+						;
+					state.foundResults = [];
+					state.isSearching = false;
+					state.searchString = "";
+					return (tableContainer.innerHTML = html);
+				}
+			}
+
+		});
+
+</script>
 {% endblock %}

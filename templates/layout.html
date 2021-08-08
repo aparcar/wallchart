@@ -123,14 +123,15 @@
       }
     });
 
-    const currentLocation = window.location;
+    const currentLocation = window.location.href;
     const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+    const adminDropdown = document.querySelector(".dropdown-toggle");
+
     navLinks.map((link, index) => {
-      if (currentLocation.href === "/") {
-        navLinks[0].classList.add("active");
-        navLinks[0].setAttribute("aria-current", "page");
-      } else if (currentLocation.href.includes(link.href)) {
-        navLinks[0].classList.remove("active");
+   if (currentLocation.includes("/users/") || currentLocation.includes("/units/") || currentLocation.includes("/upload_record")){
+        adminDropdown.classList.add("active");
+        adminDropdown.setAttribute("aria-current", "page");
+      } else if (currentLocation.includes(link.href)) {
         navLinks[index].classList.add("active");
         navLinks[index].setAttribute("aria-current", "page");
       }
