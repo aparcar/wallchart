@@ -1,2 +1,5 @@
-wallcharts.db
+*.csv
+.direnv/
+.vscode/
 __pycache__/
+wallcharts.db
