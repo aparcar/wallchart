@@ -350,7 +350,7 @@ def participation(worker_id, structure_test_id, status):
             Participation.delete().where(
                 Participation.worker == worker_id,
                 Participation.structure_test == structure_test_id,
-            )
+            ).execute()
         return ""
     else:
         return "", 400
