@@ -15,42 +15,83 @@
   </head>
   <body>
     {% if session.logged_in %}
-    <nav
-      class="navbar navbar-light sticky-top"
-      style="background-color: #e3f2fd"
-    >
-	<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('homepage') }} "
+          >Wall Charts</a
+        >
+        {% endif %} {% if session.department_id == 0 %}
+        <button
+          class="navbar-toggler collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar navbar-collapse collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                >Admin</a
+              >
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li class="dropdown-item">
+                  <a class="nav-link" href="{{ url_for('units') }}">
+                    Manage Units</a
+                  >
+                </li>
+                <li class="dropdown-item">
+                  <a class="nav-link" href="{{ url_for('users') }}">
+                    Manage Users</a
+                  >
+                </li>
+                <li class="dropdown-item">
+                  <a class="nav-link" href="{{ url_for('upload_record') }}">
+                    Upload Record</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('structure_tests') }}">
+                Structure Tests</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('departments') }}">
+                Departments</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('find_worker') }}">
+                Find Worker</a
+              >
+            </li>
+          </ul>
+          {% endif %}
 
-      <a class="nav-link" href="{{ url_for('homepage') }} ">Wall Charts</a>
-      {% endif %} {% if session.department_id == 0 %}
-      <a class="nav-link" href="{{ url_for('structure_tests') }}">
-        Structure Tests</a
-      >
-      <a class="nav-link" href="{{ url_for('departments') }}"> Departments</a>
-	  <a class="nav-link" href="{{ url_for('find_worker') }}">
-        Find Worker</a
-      >
-      <a class="nav-link" href="{{ url_for('units') }}"> Manage Units</a>
-      <a class="nav-link" href="{{ url_for('users') }}"> Manage Users</a>
-      <a class="nav-link" href="{{ url_for('upload_record') }}">
-        Upload Record</a
-      >
-      {% endif %}
-
-	  <div class="d-flex justify-content-end p-3">
-		{% if not session.logged_in %}
-		<a href="{{ url_for('login') }}">Log in</a>
-		{% else %}
-		<a href="{{ url_for('logout') }}">Log out</a>
-  
-		{% endif %}
-	  </div>
-
-	</div>
-
+            <div class="d-flex nav-item">
+              {% if not session.logged_in %}
+              <a class="nav-link" href="{{ url_for('login') }}">Log in</a>
+              {% else %}
+              <a class="nav-link" href="{{ url_for('logout') }}">Log out</a>
+              {% endif %}
+            </div>
+      
+        </div>
+      </div>
     </nav>
 
-   
     <div class="page container">
       {% for message in get_flashed_messages() %}
       <div class="alert alert-primary">{{ message }}</div>
@@ -58,15 +99,29 @@
     </div>
   </body>
   <script>
+    const toggleBurgerButton = document.querySelector(".navbar-toggler");
+    toggleBurgerButton.addEventListener("click", (e) => {
+      toggleBurgerButton.classList.toggle("collapsed");
+      const navMenu = document.querySelector(".navbar-collapse");
+      navMenu.classList.toggle("show");
+    });
+
+    const toggleAdminButton = document.querySelector(".dropdown-toggle");
+    toggleAdminButton.addEventListener("click", (e) => {
+      const toggleAdminMenu = document.querySelector(".dropdown-menu");
+      toggleAdminButton.classList.toggle("show");
+      toggleAdminMenu.classList.toggle("show");
+    });
+
     const currentLocation = window.location;
     const navLinks = Array.from(document.querySelectorAll(".nav-link"));
     navLinks.map((link, index) => {
       if (currentLocation.href === "/") {
-        navLinks[0].classList.add("active", "text-decoration-underline");
+        navLinks[0].classList.add("active");
         navLinks[0].setAttribute("aria-current", "page");
       } else if (currentLocation.href.includes(link.href)) {
-        navLinks[0].classList.remove("text-decoration-underline", "active");
-        navLinks[index].classList.add("active", "text-decoration-underline");
+        navLinks[0].classList.remove("active");
+        navLinks[index].classList.add("active");
         navLinks[index].setAttribute("aria-current", "page");
       }
     });
