@@ -166,6 +166,16 @@ def admin():
 def structure_test(structure_test_id=None):
     if request.method == "POST":
         if structure_test_id:
+            if request.form.get("delete"):
+                StructureTest.delete().where(
+                    StructureTest.id == structure_test_id
+                ).execute()
+                Participation.delete().where(
+                    Participation.structure_test == structure_test_id,
+                ).execute()
+                flash("Deleted Structure Test")
+                return redirect(url_for("structure_tests"))
+
             StructureTest.update(
                 name=request.form["name"],
                 description=request.form["description"],
