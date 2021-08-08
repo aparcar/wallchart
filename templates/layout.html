@@ -20,7 +20,7 @@
         <a class="navbar-brand" href="{{ url_for('homepage') }} "
           >Wall Charts</a
         >
-        {% endif %} {% if session.department_id == 0 %}
+        {% if session.department_id == 0 %}
         <button
           class="navbar-toggler collapsed"
           type="button"
@@ -32,8 +32,11 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="navbar navbar-collapse collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav">
+        <div
+          class=" navbar-collapse collapse"
+          id="navbarSupportedContent"
+        >
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item dropdown">
               <a
                 class="nav-link dropdown-toggle"
@@ -78,17 +81,13 @@
               >
             </li>
           </ul>
-          {% endif %}
 
-            <div class="d-flex nav-item">
-              {% if not session.logged_in %}
-              <a class="nav-link" href="{{ url_for('login') }}">Log in</a>
-              {% else %}
-              <a class="nav-link" href="{{ url_for('logout') }}">Log out</a>
-              {% endif %}
-            </div>
-      
-        </div>
+          {% endif %} {% endif %}
+          {% if not session.logged_in %}
+            <a  href="{{ url_for('login') }}">Log in</a>
+            {% else %}
+            <a  href="{{ url_for('logout') }}">Log out</a>
+            {% endif %}
       </div>
     </nav>
 
@@ -100,17 +99,28 @@
   </body>
   <script>
     const toggleBurgerButton = document.querySelector(".navbar-toggler");
-    toggleBurgerButton.addEventListener("click", (e) => {
-      toggleBurgerButton.classList.toggle("collapsed");
-      const navMenu = document.querySelector(".navbar-collapse");
-      navMenu.classList.toggle("show");
-    });
-
+    const toggleBurgerIcon = document.querySelector(".navbar-toggler-icon");
+    const toggleAdminMenu = document.querySelector(".dropdown-menu");
     const toggleAdminButton = document.querySelector(".dropdown-toggle");
-    toggleAdminButton.addEventListener("click", (e) => {
-      const toggleAdminMenu = document.querySelector(".dropdown-menu");
-      toggleAdminButton.classList.toggle("show");
-      toggleAdminMenu.classList.toggle("show");
+    const navbar = document.querySelector(".navbar");
+
+    navbar.addEventListener("click", (e) => {
+      console.log(
+        e.target === toggleBurgerButton || e.target === toggleBurgerIcon
+      );
+      if (e.target === toggleBurgerButton || e.target === toggleBurgerIcon) {
+        const navMenu = document.querySelector(".navbar-collapse");
+        navMenu.classList.toggle("show");
+        toggleBurgerButton.classList.toggle("collapsed");
+        if (!navMenu.classList.contains("show")) {
+          toggleAdminButton.classList.remove("show");
+          toggleAdminMenu.classList.remove("show");
+        }
+      }
+      if (e.target === toggleAdminButton) {
+        toggleAdminButton.classList.toggle("show");
+        toggleAdminMenu.classList.toggle("show");
+      }
     });
 
     const currentLocation = window.location;
