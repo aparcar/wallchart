@@ -9,7 +9,7 @@
 	{% for department in departments %}
 	<tr>
 		<td>
-			<a href="/workers/{{ department.slug }}">
+			<a href="{{ url_for('department', department_slug=department.slug) }}">
 				{{ department.name }}
 			</a>
 		</td>

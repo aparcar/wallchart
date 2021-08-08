@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2 class="p-2 text-left display-5">Structure Tests</h2>
+<div class="row row-cols-1 row-cols-md-2 g-4">
+	<div class="col">
+	<div class="card">
+		<div class="card-body">
+			<a href="{{ url_for("structure_tests") }}">
+				<h5 class="card-title">Structure Test Overview</h5>
+			</a>
+		</div>
+	</div>
+</div>
+</br>
+{% if structure_test %}
+<form action="{{ url_for("structure_test", structure_test_id=structure_test.id) }}" method=post>
+{% else %}
+<form action="{{ url_for("structure_test") }}" method=post>
+{% endif %}
+    <p>
+        <label for="name">Name</label>
+        <input name="name" type="text" value="{{ structure_test.name }}" />
+    </p>
+    <p>
+        <label for="description">Description</label>
+        <textarea name="description">{{ structure_test.description }}</textarea>
+    </p>
+	<p>
+	<label for="active">Active</label>
+	<input name="active" type="checkbox" value=True {{ "checked" if structure_test.active }}/>
+	</p>
+    <input type="submit" value="{% if structure_test %}Update{% else %}Create{% endif %} Structure Test" />
+</form>
+{% endblock %}

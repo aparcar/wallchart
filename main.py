@@ -81,6 +81,7 @@ class Unit(BaseModel):
 class Department(BaseModel):
     name = CharField(unique=True)
     slug = CharField()
+    alias = CharField(unique=True, null=True)
     unit = ForeignKeyField(Unit, backref="departments", null=True)
 
 
@@ -160,6 +161,37 @@ def admin():
     return render_template("admin.html")
 
 
+@app.route("/structure_test", methods=["GET", "POST"])
+@app.route("/structure_test/<int:structure_test_id>", methods=["GET", "POST"])
+def structure_test(structure_test_id=None):
+    if request.method == "POST":
+        if structure_test_id:
+            StructureTest.update(
+                name=request.form["name"],
+                description=request.form["description"],
+                active=bool(request.form.get("active")),
+            ).where(StructureTest.id == structure_test_id).execute()
+            flash("Structure test updated")
+        else:
+            structure_test, created = StructureTest.get_or_create(
+                name=request.form["name"], description=request.form["description"]
+            )
+            if created:
+                flash(f"Added Structure Test '{ structure_test.name }'")
+            else:
+                flash("Structure test already exists")
+            return redirect(
+                url_for("structure_test", structure_test_id=structure_test.id)
+            )
+
+    if structure_test_id:
+        structure_test = StructureTest.get(StructureTest.id == structure_test_id)
+    else:
+        structure_test = None
+
+    return render_template("structure_test.html", structure_test=structure_test)
+
+
 @app.route("/find_worker")
 def find_worker():
     return render_template("find_worker.html")
@@ -207,14 +239,18 @@ def departments():
     )
 
 
-@app.route("/workers/<path:department_slug>")
-@app.route("/workers/")
+@app.route("/department/<path:department_slug>", methods=["GET", "POST"])
 @login_required
-def workers(department_slug=None):
-    if department_slug and session.get("department_id") == 0:
-        department = Department.get(Department.slug == department_slug)
-    else:
-        department = Department.get(Department.id == session.get("department_id"))
+def department(department_slug=None):
+    department = Department.get(Department.slug == department_slug)
+
+    if request.method == "POST":
+        # only admins can switch department alias
+        if session.get("department_id") == 0:
+            Department.update(alias=request.form["alias"]).where(
+                Department.slug == department_slug
+            ).execute()
+        flash("Department updated")
 
     workers = (
         Worker.select(
@@ -237,7 +273,7 @@ def workers(department_slug=None):
     structure_tests = StructureTest.select().order_by(StructureTest.added)
 
     return render_template(
-        "workers.html",
+        "department.html",
         workers=workers,
         worker_count=len(workers),
         department=department,
@@ -278,22 +314,31 @@ def api_departments():
 @app.route("/structure_tests", methods=["GET", "POST"])
 @login_required
 def structure_tests():
-    if request.method == "POST":
-        structure_test, created = StructureTest.get_or_create(
-            name=request.form["name"], description=request.form["description"]
+    structure_tests = (
+        StructureTest.select(
+            StructureTest, fn.count(Participation.id).alias("participation")
         )
-        if created:
-            flash("Structure Test added")
-        else:
-            flash("Structure test already exists")
+        .join(
+            Participation,
+            JOIN.LEFT_OUTER,
+            on=(StructureTest.id == Participation.structure_test),
+        )
+        .group_by(StructureTest.id)
+        .order_by(StructureTest.added)
+    )
+    worker_count = (
+        Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
+    )
+    return render_template(
+        "structure_tests.html",
+        structure_tests=structure_tests,
+        worker_count=worker_count,
+    )
 
-    structure_tests = StructureTest.select().order_by(StructureTest.added)
-    return render_template("structure_tests.html", structure_tests=structure_tests)
 
-
-@app.route("/workers/edit/<int:worker_id>", methods=["GET", "POST"])
+@app.route("/worker/<int:worker_id>", methods=["GET", "POST"])
 @login_required
-def workers_edit(worker_id):
+def worker(worker_id):
     if request.method == "POST":
 
         update = {
@@ -313,7 +358,7 @@ def workers_edit(worker_id):
         flash("Worker data updated")
 
     worker = Worker.get(Worker.id == worker_id)
-    return render_template("workers_edit.html", worker=worker, Department=Department)
+    return render_template("worker.html", worker=worker, Department=Department)
 
 
 @app.route("/users/", methods=["GET", "POST"])
@@ -444,8 +489,5 @@ if __name__ == "__main__":
             password=sha256("admin".encode("utf-8")).hexdigest(),
             department=0,
         )
-
-    Participation.get_or_create(worker=625, structure_test=1)
-    Participation.get_or_create(worker=625, structure_test=2)
 
     app.run()

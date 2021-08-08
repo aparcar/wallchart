@@ -1,42 +1,39 @@
 {% extends "layout.html" %}
 {% block body %}
-<h2 class="p-2 text-left display-5">Create</h2>
+<h2>Update worker data</h2>
+<form action="{{ url_for('worker', worker_id=worker.id) }}" method=post>
 	<h3>
-	Worker
-	{%- if worker.preferred_name %}
-	{{ worker.preferred_name }} ({{ worker.name }})
-	{% else %}
-	{{ worker.name }}
-	{% endif %}
+		Worker
+		{%- if worker.preferred_name %}
+		{{ worker.preferred_name }} ({{ worker.name }})
+		{% else %}
+		{{ worker.name }}
+		{% endif %}
 	</h3>
-	<p>Added since {{ worker.added }}, last known contract from {{ worker.updated }}</p>
-<form action="/workers/edit/{{ worker.id }}" method=post>
-
-	<div class="mb-3">
+	<p>
+	<p>Added since {{ worker.added }}, last known contract from {{ worker.updated }}<p>
+	<p>
 	<label for="preferred_name">Preferred name</label>
 	<input name="preferred_name" type="text" value="{{ worker.preferred_name or "" }}" placeholder="{{ worker.name }}" />
-</div>
-<div class="mb-3">
-	
+	</p>
+	<p>
 	<label for="pronouns">Pronouns</label>
 	<input name="pronouns" type="text" value="{{ worker.pronouns or ""}}" placeholder="gender is a spectrum" />
-</div>
-<div class="mb-3">
-
+	</p>
 	<label for="email">E-Mail</label>
 	<input name="email" type="text" value="{{ worker.email or "" }}" placeholder="worker@email.com" />
-</div>
-<div class="mb-3">
+	</p>
+	<p>
 	<label for="phone">Phone (only numbers)</label>
 	<input name="phone" type="text" value="{{ worker.phone or ""}}" placeholder="18081234567" />
-</div>
-<div class="mb-3">
+	</p>
+	<p>
 	<label for="dept">Department</label>
 	<input name="dept" type="text"
 		value="{{ Department.get_by_id(worker.department_id).name }}" disabled />
+	</p>
 	{% if session.department_id == 0 %}
-</div>
-<div class="mb-3">
+	<p>
 	<label for="organizing_dept">Organizing department</label>
 	<select name="organizing_dept">
 		{% for department in Department.select().order_by(Department.name) %}
@@ -50,20 +47,16 @@
 		</option>
 		{% endfor %}
 	</select>
+	</p>
 	{% endif %}
-</div>
-<div class="mb-3">
+	<p>
 	<label for="notes">Notes</label>
 	<textarea name="notes">{{ worker.notes or "" }}</textarea>
-</div>
-<div class="mb-3">
-	<label for="active">Active</label>
-	<input name="active" type="checkbox" value=True {{'checked="checked"' if worker.active }}/>
-	<div id="emailHelp" class="form-text">Uncheck if worker graduated or is otherwise not currently associated with the university.</div>
-</div>
-<div class="mb-3">
-	<button type="submit" class="btn btn-primary" value="Update data">Submit Changes</button>
-</div>
-
+	</p>
+	<p>
+	<label for="active">Active (uncheck if worker graduated or is otherwise not currently associated with the university)</label>
+	<input name="active" type="checkbox" value=True {{ "checked" if worker.active }}/>
+	</p>
+	<input type="submit" value="Update data" />
 </form>
 {% endblock %}
