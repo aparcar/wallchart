@@ -276,7 +276,10 @@ def department(department_slug=None):
             .alias("participated"),
         )
         .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
-        .where(Worker.organizing_dept_id == department.id)
+        .where(
+            (Worker.organizing_dept_id == department.id)
+            | (Worker.department_id == department.id)
+        )
         .group_by(Worker.id)
         .order_by(Worker.name, Participation.structure_test)
     )
