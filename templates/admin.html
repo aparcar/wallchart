@@ -1,57 +1,5 @@
 {% extends "layout.html" %}
 {% block body %}
-
-
 <h3 class="display-6">Manage Wallchart</h3>
-
-<div class="row row-cols-1 row-cols-md-2 g-4">
-	<div class="col">
-	<div class="card">
-		<div class="card-body">
-			<a href="{{ url_for("departments") }}">
-				<h5 class="card-title">See all Departments</h5>
-			</a>
-		</div>
-	</div>
-</div>
-<div class="col">
-
-	<div class="card">
-		<div class="card-body">
-			<a href="{{ url_for("structure_tests") }}">
-				<h5 class="card-title">Manage Structure Tests</h5>
-			</a>
-		</div>
-	</div>
-</div>
-<div class="col">
-
-	<div class="card">
-		<div class="card-body">
-			<a href="{{ url_for("units") }}">
-				<h5 class="card-title">Manage Units</h5>
-			</a>
-		</div>
-	</div>
-</div>
-<div class="col">
-
-	<div class="card">
-		<div class="card-body">
-			<a href="{{ url_for("users") }}">
-				<h5 class="card-title">Manage Users</h5>
-			</a>
-		</div>
-	</div>
-</div>
-<div class="col">
-	<div class="card">
-		<div class="card-body">
-			<a href="{{ url_for("upload_record") }}">
-				<h5 class="card-title">Upload contract record</h5>
-			</a>
-		</div>
-	</div>
-</div>
-
-	{% endblock %}
+<p>Departments: {{ department_count }}</p>
+{% endblock %}

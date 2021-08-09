@@ -161,7 +161,9 @@ def homepage():
 
 @app.route("/admin")
 def admin():
-    return render_template("admin.html")
+    # select departments but remove the pseudo "admin" department
+    department_count = Department.select(fn.count(Department.id)).scalar() - 1
+    return render_template("admin.html", department_count=department_count)
 
 
 @app.route("/structure_test", methods=["GET", "POST"])
