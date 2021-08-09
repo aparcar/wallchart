@@ -104,6 +104,10 @@ class StructureTest(BaseModel):
 class Participation(BaseModel):
     worker = ForeignKeyField(Worker, field="id")
     structure_test = ForeignKeyField(StructureTest)
+    added = DateField(default=date.today)
+
+    class Meta:
+        indexes = ((("worker", "structure_test"), True),)
 
 
 def create_tables():
@@ -388,7 +392,32 @@ def worker(worker_id):
         flash("Worker data updated")
 
     worker = Worker.get(Worker.id == worker_id)
-    return render_template("worker.html", worker=worker, Department=Department)
+
+    structure_tests = list(
+        StructureTest.select(
+            StructureTest.id,
+            StructureTest.name,
+            StructureTest.description,
+            Participation.added,
+        )
+        .join(
+            Participation,
+            JOIN.LEFT_OUTER,
+            on=(
+                (StructureTest.id == Participation.structure_test)
+                & (Participation.worker == worker_id)
+            ),
+        )
+        .order_by(StructureTest.added)
+        .dicts()
+    )
+
+    return render_template(
+        "worker.html",
+        worker=worker,
+        structure_tests=structure_tests,
+        Department=Department,
+    )
 
 
 @app.route("/users/", methods=["GET", "POST"])

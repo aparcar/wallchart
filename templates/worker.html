@@ -1,5 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
+<script>
+	function toggleParticipation(element) {
+		fetch("/participation/" +
+			element.dataset.worker + "/" +
+			element.dataset.structure_test + "/" +
+			(element.checked ? 1 : 0))
+			.then(response => console.log(response));
+	}
+</script>
 <h2>Update worker data</h2>
 <form action="{{ url_for('worker', worker_id=worker.id) }}" method=post>
 	<h3>
@@ -8,7 +17,7 @@
 		{{ worker.preferred_name }} ({{ worker.name }})
 		{% else %}
 		{{ worker.name }}
-		{% endif %}
+		{% endif %} (ID: {{ worker.id }})
 	</h3>
 	<p>
 	<p>Added since {{ worker.added }}, last known contract from {{ worker.updated }}<p>
@@ -59,4 +68,33 @@
 	</p>
 	<input type="submit" value="Update data" />
 </form>
+
+<h2>Structure Tests</h2>
+<table class="table table-striped table-hover">
+	<thead>
+		<tr>
+			<th scope="col">Name</th>
+			<th scope="col">Description</th>
+			<th scope="col">Participation</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for structure_test in structure_tests %}
+		<tr>
+			<td scope="row">{{ structure_test.name }}</td>
+			<td scope="row">{{ structure_test.description }}</td>
+			<td>
+				<input
+					type="checkbox"
+					data-worker="{{ worker.id }}"
+					data-structure_test="{{ structure_test.id }}"
+					name="{{ structure_test.name }}"
+					onchange="toggleParticipation(this);"
+					{{ "checked" if structure_test.added }} >
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
 {% endblock %}
