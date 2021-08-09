@@ -221,6 +221,7 @@ def find_worker():
 
 @app.route("/login/", methods=["GET", "POST"])
 def login():
+    status = 200
     if request.method == "POST" and request.form["email"]:
         try:
             pw_hash = sha256(request.form["password"].encode("utf-8")).hexdigest()
@@ -228,11 +229,12 @@ def login():
                 (User.email == request.form["email"]) & (User.password == pw_hash)
             )
         except User.DoesNotExist:
-            flash("The password entered is incorrect")
+            status = 403
+            flash("Wrong user or password")
         else:
             auth_user(user)
             return redirect(url_for("homepage"))
-    return render_template("login.html")
+    return render_template("login.html"), status
 
 
 @app.route("/units/", methods=["GET", "POST"])
