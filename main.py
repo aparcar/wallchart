@@ -6,10 +6,29 @@ from functools import wraps
 from hashlib import sha256
 from pathlib import Path
 
-from flask import (Flask, flash, g, jsonify, redirect, render_template,
-                   request, session, url_for)
-from peewee import (JOIN, BooleanField, CharField, DateField, ForeignKeyField,
-                    IntegerField, Model, SqliteDatabase, TextField, fn)
+from flask import (
+    Flask,
+    flash,
+    g,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+from peewee import (
+    JOIN,
+    BooleanField,
+    CharField,
+    DateField,
+    ForeignKeyField,
+    IntegerField,
+    Model,
+    SqliteDatabase,
+    TextField,
+    fn,
+)
 from slugify import slugify
 
 logger = logging.getLogger("peewee")
