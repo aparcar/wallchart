@@ -10,7 +10,12 @@
 	<tr>
 		<td>
 			<a href="{{ url_for('department', department_slug=department.slug) }}">
-				{{ department.name }}
+				{% if department.alias %}
+				<b>{{ department.alias }}</b> ({{ department.name }})
+				{% else %}
+				<b>{{ department.name }}</b>
+				{% endif %}
+				({{ department.worker_count }})
 			</a>
 		</td>
 		<td>{{ department.chair | join(', ', attribute="email") }}</td>

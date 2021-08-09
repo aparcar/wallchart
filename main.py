@@ -243,7 +243,12 @@ def units():
 @app.route("/departments/")
 @login_required
 def departments():
-    departments = Department.select().order_by(Department.name)
+    departments = (
+        Department.select(Department, fn.count(Worker.id).alias("worker_count"))
+        .join(Worker, on=(Department.id == Worker.organizing_dept_id))
+        .group_by(Department.id)
+        .order_by(Department.name)
+    )
     department_count = len(departments)
     return render_template(
         "departments.html",
