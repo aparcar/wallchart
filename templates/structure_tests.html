@@ -29,7 +29,11 @@
 			<td>{{ structure_test.description}}</td>
 			<td>{{ structure_test.active }}</td>
 			<td>{{ structure_test.added }}</td>
-			<td>{{ structure_test.participation }} ({{ (structure_test.participation / worker_count * 100) | round(2) }}%)</td>
+			<td>
+				{% set percentage = (structure_test.participation / worker_count * 100) | round(2) %}
+				{{ structure_test.participation }} ({{ percentage }}%)
+				<meter low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
+			</td>
 		</tr>
 		{% endfor %}
 	</table>
