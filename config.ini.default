@@ -1,0 +1,12 @@
+[databse]
+path = wallcharts.db
+
+[admin]
+email = admin@admin.com
+password = changeme
+
+[flask]
+secret = changeme
+
+[logging]
+level = DEBUG

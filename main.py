@@ -1,3 +1,4 @@
+import configparser
 import csv
 import io
 import logging
@@ -31,14 +32,19 @@ from peewee import (
 )
 from slugify import slugify
 
+config = configparser.ConfigParser()
+config.read("config.ini")
+
 logger = logging.getLogger("peewee")
 logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.DEBUG)
+logger.setLevel(config["logging"]["level"])
 
 
-DATABASE = "wallcharts.db"
-DEBUG = True
-SECRET_KEY = "seeCho2deisi6ahwach4ohw4Daeghee3"
+DATABASE = config["database"]["path"]
+SECRET_KEY = config["flask"]["secret"]
+
+assert SECRET_KEY != "changeme", "Change flask secret in config.ini"
+
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -498,9 +504,13 @@ if __name__ == "__main__":
             name="Admin",
             slug="admin",
         )
+        assert (
+            config["admin"]["password"] != "changeme"
+        ), "Change admin password in config.ini"
+
         User.get_or_create(
-            email="admin@admin.com",
-            password=sha256("admin".encode("utf-8")).hexdigest(),
+            email=config["admin"]["email"],
+            password=sha256(config["admin"]["password"].encode("utf-8")).hexdigest(),
             department=0,
         )
 
