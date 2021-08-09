@@ -1,38 +1,16 @@
-from peewee import SqliteDatabase
-from peewee import Model
-from peewee import CharField
+import csv
 import io
-from peewee import BooleanField
-from peewee import TextField
-from peewee import ForeignKeyField
-from peewee import IntegerField
-from peewee import DeferredForeignKey
-from peewee import DateField
-from peewee import CompositeKey
-from peewee import AutoField
-from peewee import JOIN
-
-from flask import Flask
-from flask import g
-from flask import session
-from flask import flash
-from flask import redirect
-from flask import url_for
-from flask import request
-from flask import render_template
-from flask import jsonify
-
+import logging
+from datetime import date
 from functools import wraps
 from hashlib import sha256
 from pathlib import Path
+
+from flask import (Flask, flash, g, jsonify, redirect, render_template,
+                   request, session, url_for)
+from peewee import (JOIN, BooleanField, CharField, DateField, ForeignKeyField,
+                    IntegerField, Model, SqliteDatabase, TextField, fn)
 from slugify import slugify
-from datetime import date
-from peewee import fn
-
-import csv
-
-import logging
-
 
 logger = logging.getLogger("peewee")
 logger.addHandler(logging.StreamHandler())
