@@ -151,7 +151,7 @@ def homepage():
         if session.get("department_id") == 0:
             return redirect(url_for("admin"))
         else:
-            return redirect(url_for("workers"))
+            return redirect(url_for("department"))
     else:
         return redirect(url_for("login"))
 
@@ -249,10 +249,14 @@ def departments():
     )
 
 
+@app.route("/department/")
 @app.route("/department/<path:department_slug>", methods=["GET", "POST"])
 @login_required
 def department(department_slug=None):
-    department = Department.get(Department.slug == department_slug)
+    if department_slug:
+        department = Department.get(Department.slug == department_slug)
+    else:
+        department = Department.get(Department.id == session["department_id"])
 
     if request.method == "POST":
         # only admins can switch department alias
