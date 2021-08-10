@@ -539,8 +539,8 @@ def parse_csv(csv_file_b):
 
         for row in reader:
             department, _ = Department.get_or_create(
-                name=row["Dept ID Desc"].title(),
-                slug=slugify(row["Dept ID Desc"]),
+                name=row["Job Sect Desc"].title(),
+                slug=slugify(row["Job Sect Desc"]),
             )
 
             worker, created = Worker.get_or_create(
