@@ -4,9 +4,9 @@ import io
 import logging
 from datetime import date
 from functools import wraps
-from hashlib import sha256
 from pathlib import Path
 
+import bcrypt
 from flask import (
     Flask,
     flash,
@@ -234,17 +234,22 @@ def find_worker():
 def login():
     status = 200
     if request.method == "POST" and request.form["email"]:
-        try:
-            pw_hash = sha256(request.form["password"].encode("utf-8")).hexdigest()
-            user = User.get(
-                (User.email == request.form["email"]) & (User.password == pw_hash)
-            )
-        except User.DoesNotExist:
-            status = 403
-            flash("Wrong user or password")
-        else:
+        user = User.get_or_none(User.email == request.form["email"])
+
+        if user and bcrypt.checkpw(
+            request.form["password"].encode(), user.password.encode()
+        ):
             auth_user(user)
             return redirect(url_for("homepage"))
+        else:
+            # add pseudo operation to avoid timing attacks
+            bcrypt.checkpw(
+                request.form["password"].encode(),
+                "$2b$12$L9jjpO8UOMTUiBSw3ptx2OiFf762t9IUfO/5s3HQzH.NpA9bUdFZ.".encode(),
+            )
+
+            status = 403
+            flash("Wrong user or password")
     return render_template("login.html"), status
 
 
@@ -468,7 +473,7 @@ def users():
         else:
             User.create(
                 email=request.form["email"],
-                password=sha256(request.form["password"].encode("utf-8")).hexdigest(),
+                password=bcryptify(request.form["password"]),
                 department=request.form["department"],
             )
             flash("User created")
@@ -564,6 +569,10 @@ def parse_csv(csv_file_b):
             worker.update(updated=date.today())
 
 
+def bcryptify(password: str):
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode("utf-8")
+
+
 if __name__ == "__main__":
     if not Path(DATABASE).exists():
         create_tables()
@@ -578,7 +587,7 @@ if __name__ == "__main__":
 
         User.get_or_create(
             email=config["admin"]["email"],
-            password=sha256(config["admin"]["password"].encode("utf-8")).hexdigest(),
+            password=bcryptify(config["admin"]["password"]),
             department=0,
         )
 
