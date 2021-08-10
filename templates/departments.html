@@ -4,6 +4,7 @@
 <table class="table table-striped table-hover">
     <tr>
         <th scope="col">Name</th>
+        <th scope="col">Participation</th>
         <th scope="col">Chair</th>
     </tr>
     {% for department in departments %}
@@ -18,6 +19,10 @@
                 ({{ department.worker_count }})
             </a>
         </td>
+	<td>
+          {% set percentage = ( department.participation / department.worker_count * 100) | round(2) %}
+          <meter low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
+	</td>
         <td>{{ department.chair | join(', ', attribute="email") }}</td>
     </tr>
     {% endfor %}

@@ -266,8 +266,18 @@ def units():
 @login_required
 def departments():
     departments = (
-        Department.select(Department, fn.count(Worker.id).alias("worker_count"))
+        Department.select(
+            Department,
+            fn.count(Worker.id).alias("worker_count"),
+            fn.count(Participation.id).alias("participation"),
+        )
         .join(Worker, on=(Department.id == Worker.organizing_dept_id))
+        .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
+        .join(
+            StructureTest,
+            JOIN.LEFT_OUTER,
+            on=(Participation.structure_test == StructureTest.id),
+        )
         .group_by(Department.id)
         .order_by(Department.name)
     )
