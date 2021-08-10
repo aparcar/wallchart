@@ -15,6 +15,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_file,
     session,
     url_for,
 )
@@ -163,6 +164,15 @@ def homepage():
         return redirect(url_for("login"))
 
 
+@app.route("/download_db")
+@login_required
+def download_db():
+    return send_file(
+        config["database"]["path"],
+        download_name=f"wallchart-backup-{date.today().strftime('%d-%m-%Y')}.db",
+    )
+
+
 @app.route("/admin")
 def admin():
     # select departments but remove the pseudo "admin" department
@@ -215,6 +225,7 @@ def structure_test(structure_test_id=None):
 
 
 @app.route("/find_worker")
+@login_required
 def find_worker():
     return render_template("find_worker.html")
 
