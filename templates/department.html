@@ -67,14 +67,16 @@
 			</td>
 			<td>{{ worker.unit }}</td>
 			<td>{{ worker.contract }}</td>
-			<td>{% if worker.email %}<a href="mailto:{{ worker.email }}">{{ worker.email }}</a>{% else %}Unknown{% endif
-				%}</td>
-			<td>{{ worker.phone or "Unknown" }}</td>
+			<td>{% if worker.email %}<a href="mailto:{{ worker.email }}">{{ worker.email }}</a>{% else %}Unknown{% endif %}</td>
+			<td>{% if worker.phone %}<a href="sms:{{ worker.phone }}">{{ worker.phone }}</a>{% else %}Unknown{% endif %}</td>
 			{% for structure_test in structure_tests %}
 			<th>
-				<input type="checkbox" data-worker="{{ worker.id }}" data-structure_test="{{ structure_test.id }}"
-					name="{{ structure_test.name }}" onchange="toggleParticipation(this);" {{ "checked" if
-					structure_test.id in worker.participated }}>
+				<input type="checkbox"
+					data-worker="{{ worker.id }}"
+					data-structure_test="{{ structure_test.id }}"
+					name="{{ structure_test.name }}"
+					onchange="toggleParticipation(this);"
+					{{ "checked" if structure_test.id in worker.participated }}>
 			</th>
 			{% endfor %}
 		</tr>
