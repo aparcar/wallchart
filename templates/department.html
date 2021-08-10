@@ -48,8 +48,6 @@
     <thead>
         <tr>
             <th scope="col">Name</th>
-            <th scope="col">Unit</th>
-            <th scope="col">Contract</th>
             <th scope="col">E-Mail</th>
             <th scope="col">Phone</th>
             {% for structure_test in structure_tests %}
@@ -66,8 +64,6 @@
                     {{ worker.name }}
                 </a>
             </td>
-            <td>{{ worker.unit }}</td>
-            <td>{{ worker.contract }}</td>
             <td>{% if worker.email %}<a href="mailto:{{ worker.email }}">{{ worker.email }}</a>{% else %}Unknown{% endif %}</td>
             <td>{% if worker.phone %}<a href="sms:{{ worker.phone }}">{{ worker.phone }}</a>{% else %}Unknown{% endif %}</td>
             {% for structure_test in structure_tests %}
