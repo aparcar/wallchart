@@ -349,7 +349,13 @@ def api_workers():
 @app.route("/api/participation")
 @login_required
 def api_participation():
-    return jsonify(list(Participation.select().dicts()))
+    return jsonify(
+        list(
+            Participation.select(Participation, Worker.organizing_dept_id)
+            .join(Worker, on=(Participation.worker == Worker.id))
+            .dicts()
+        )
+    )
 
 
 @app.route("/api/departments")
