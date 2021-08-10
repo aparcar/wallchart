@@ -104,6 +104,10 @@ class StructureTest(BaseModel):
 class Participation(BaseModel):
     worker = ForeignKeyField(Worker, field="id")
     structure_test = ForeignKeyField(StructureTest)
+    added = DateField(default=date.today)
+
+    class Meta:
+        indexes = ((("worker", "structure_test"), True),)
 
 
 def create_tables():
@@ -217,6 +221,7 @@ def find_worker():
 
 @app.route("/login/", methods=["GET", "POST"])
 def login():
+    status = 200
     if request.method == "POST" and request.form["email"]:
         try:
             pw_hash = sha256(request.form["password"].encode("utf-8")).hexdigest()
@@ -224,11 +229,12 @@ def login():
                 (User.email == request.form["email"]) & (User.password == pw_hash)
             )
         except User.DoesNotExist:
-            flash("The password entered is incorrect")
+            status = 403
+            flash("Wrong user or password")
         else:
             auth_user(user)
             return redirect(url_for("homepage"))
-    return render_template("login.html")
+    return render_template("login.html"), status
 
 
 @app.route("/units/", methods=["GET", "POST"])
@@ -388,7 +394,32 @@ def worker(worker_id):
         flash("Worker data updated")
 
     worker = Worker.get(Worker.id == worker_id)
-    return render_template("worker.html", worker=worker, Department=Department)
+
+    structure_tests = list(
+        StructureTest.select(
+            StructureTest.id,
+            StructureTest.name,
+            StructureTest.description,
+            Participation.added,
+        )
+        .join(
+            Participation,
+            JOIN.LEFT_OUTER,
+            on=(
+                (StructureTest.id == Participation.structure_test)
+                & (Participation.worker == worker_id)
+            ),
+        )
+        .order_by(StructureTest.added)
+        .dicts()
+    )
+
+    return render_template(
+        "worker.html",
+        worker=worker,
+        structure_tests=structure_tests,
+        Department=Department,
+    )
 
 
 @app.route("/users/", methods=["GET", "POST"])
