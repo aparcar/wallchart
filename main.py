@@ -77,22 +77,18 @@ class Worker(BaseModel):
         indexes = ((("name", "unit", "department_id", "contract"), True),)
 
 
-class Unit(BaseModel):
-    name = CharField(unique=True)
+class Group(BaseModel):
+    name = TextField(unique=True)
     slug = CharField()
-
-
-class Department(BaseModel):
-    name = CharField(unique=True)
-    slug = CharField()
-    alias = CharField(unique=True, null=True)
-    unit = ForeignKeyField(Unit, backref="departments", null=True)
+    nick = CharField(null=True)
+    parent = ForeignKeyField("self", backref="subgroups", null=True)
 
 
 class User(BaseModel):
-    email = CharField(unique=True)
+    name = CharField()
+    email = CharField(primary_key=True)
     password = CharField()
-    department = ForeignKeyField(Department, backref="chair", null=True)
+    group = ForeignKeyField(Group, backref="alakai", null=True)
 
 
 class StructureTest(BaseModel):
@@ -113,9 +109,7 @@ class Participation(BaseModel):
 
 def create_tables():
     with database:
-        database.create_tables(
-            [Worker, Unit, Department, User, StructureTest, Participation]
-        )
+        database.create_tables([Worker, StructureTest, Participation, Group, User])
 
 
 def auth_user(user):
@@ -176,8 +170,11 @@ def download_db():
 @app.route("/admin")
 def admin():
     # select departments but remove the pseudo "admin" department
+    Department = Group.get(Group.slug == "department")
     department_count = Department.select(fn.count(Department.id)).scalar() - 1
-    worker_count = Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
+    worker_count = (
+        Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
+    )
     return render_template(
         "admin.html", department_count=department_count, worker_count=worker_count
     )
@@ -265,23 +262,41 @@ def units():
 @app.route("/departments/")
 @login_required
 def departments():
+    Parent = Group.alias()
     departments = (
-        Department.select(
-            Department,
+        Group.select(
+            Group,
             fn.count(Worker.id).alias("worker_count"),
             fn.count(Participation.id).alias("participation"),
         )
-        .join(Worker, on=(Department.id == Worker.organizing_dept_id))
+        .join(Parent, on=(Group.parent == Parent.id))
+        .join(Worker, on=(Group.id == Worker.organizing_dept_id))
         .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
         .join(
             StructureTest,
             JOIN.LEFT_OUTER,
             on=(Participation.structure_test == StructureTest.id),
         )
-        .group_by(Department.id)
-        .order_by(Department.name)
+        .where(Parent.slug == "department")
     )
-    department_count = len(departments)
+#    departments = (
+#        Department.select(
+#            Department,
+#            fn.count(Worker.id).alias("worker_count"),
+#            fn.count(Participation.id).alias("participation"),
+#        )
+#        .join(Worker, on=(Department.id == Worker.organizing_dept_id))
+#        .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
+#        .join(
+#            StructureTest,
+#            JOIN.LEFT_OUTER,
+#            on=(Participation.structure_test == StructureTest.id),
+#        )
+#        .group_by(Department.id)
+#        .order_by(Department.name)
+#    )
+    #department_count = len(departments)
+    department_count = 1
     return render_template(
         "departments.html",
         departments=departments,
@@ -294,15 +309,15 @@ def departments():
 @login_required
 def department(department_slug=None):
     if department_slug:
-        department = Department.get(Department.slug == department_slug)
+        department = Group.get(Group.slug == department_slug)
     else:
-        department = Department.get(Department.id == session["department_id"])
+        department = Group.get(Group.id == session["department_id"])
 
     if request.method == "POST":
         # only admins can switch department alias
         if session.get("department_id") == 0:
-            Department.update(alias=request.form["alias"]).where(
-                Department.slug == department_slug
+            Group.update(alias=request.form["nick"]).where(
+                Group.slug == department_slug
             ).execute()
         flash("Department updated")
 
@@ -325,7 +340,7 @@ def department(department_slug=None):
     )
 
     last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
-    units = Unit.select().order_by(Unit.name)
+    units = Group.get(Group.slug == "unit").subgroups.order_by(Group.name)
 
     structure_tests = StructureTest.select().order_by(StructureTest.added)
 
@@ -532,6 +547,7 @@ def upload_record():
             return redirect(request.url)
 
         if record:
+            Department = Group.get(Group.slug == "department")
             parse_csv(record)
             new_workers = (
                 Worker.select(Worker, Department)
@@ -547,10 +563,13 @@ def parse_csv(csv_file_b):
     with io.TextIOWrapper(csv_file_b, encoding="utf-8") as csv_file:
         reader = csv.DictReader(csv_file, delimiter=";")
 
+        department_group = Group.get(Group.slug == "department")
+
         for row in reader:
-            department, _ = Department.get_or_create(
+            department, _ = Group.get_or_create(
                 name=row["Job Sect Desc"].title(),
                 slug=slugify(row["Job Sect Desc"]),
+                parent=department_group,
             )
 
             worker, created = Worker.get_or_create(
@@ -564,22 +583,32 @@ def parse_csv(csv_file_b):
             worker.update(updated=date.today())
 
 
+def create_group(parent, name):
+    subgroups = config["groups"][name].split()
+    for subgroup in subgroups:
+        print(f"Create group {subgroup}")
+        new_parent = Group.create(name=subgroup, slug=slugify(subgroup), parent=parent)
+        if subgroup in config["groups"].keys():
+            create_group(new_parent, subgroup)
+
+
 if __name__ == "__main__":
     if not Path(DATABASE).exists():
         create_tables()
-        Department.get_or_create(
-            id=0,
-            name="Admin",
-            slug="admin",
-        )
+        create_group(None, "root")
+
+        department_group = Group.get(Group.slug == "department")
+
+        admin_group = Group.create(name="Admin", slug="admin", parent=department_group)
         assert (
             config["admin"]["password"] != "changeme"
         ), "Change admin password in config.ini"
 
         User.get_or_create(
+            name="Admin Account",
             email=config["admin"]["email"],
             password=sha256(config["admin"]["password"].encode("utf-8")).hexdigest(),
-            department=0,
+            group=admin_group,
         )
 
     app.run()

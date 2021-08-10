@@ -11,8 +11,8 @@
     <tr>
         <td>
             <a href="{{ url_for('department', department_slug=department.slug) }}">
-                {% if department.alias %}
-                <b>{{ department.alias }}</b> ({{ department.name }})
+                {% if department.nick %}
+                <b>{{ department.nick }}</b> ({{ department.name }})
                 {% else %}
                 <b>{{ department.name }}</b>
                 {% endif %}

@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 <h2>Department
-    {% if department.alias %}
-    <b>{{ department.alias }}</b> ({{ department.name }})
+    {% if department.nick %}
+    <b>{{ department.nick }}</b> ({{ department.name }})
     {% else %}
     <b>{{ department.name }}</b>
     {% endif %}
@@ -13,15 +13,15 @@
 <select name="unit" onchange="setDepartmentUnit(this);">
     <option value="">None</option>
     {%- for unit in units %}
-    <option value="{{ unit.id }}" {% if department.unit.id==unit.id %}selected="selected" {% endif %}>
+    <option value="{{ unit.id }}" {% if department.parent.id==unit.id %}selected="selected" {% endif %}>
         {{- unit.name -}}
     </option>
     {%- endfor %}
 </select>
 <form action="{{ url_for('department', department_slug=department.slug) }}" method=post>
-    <label for="alias">Alias </label>
-    <input name="alias" type="text" value="{{  department.alias }}" />
-    <input type="submit" value="Set alias" />
+    <label for="nick">Nick</label>
+    <input name="nick" type="text" value="{{  department.nick }}" />
+    <input type="submit" value="Set nick" />
 </form>
 {% endif %}
 <p>
