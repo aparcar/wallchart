@@ -177,7 +177,9 @@ def download_db():
 def admin():
     # select departments but remove the pseudo "admin" department
     department_count = Department.select(fn.count(Department.id)).scalar() - 1
-    worker_count = Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
+    worker_count = (
+        Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
+    )
     return render_template(
         "admin.html", department_count=department_count, worker_count=worker_count
     )
@@ -196,14 +198,13 @@ def structure_test(structure_test_id=None):
                     Participation.structure_test == structure_test_id,
                 ).execute()
                 flash("Deleted Structure Test")
-                return redirect(url_for("structure_tests"))
-
-            StructureTest.update(
-                name=request.form["name"],
-                description=request.form["description"],
-                active=bool(request.form.get("active")),
-            ).where(StructureTest.id == structure_test_id).execute()
-            flash("Structure test updated")
+            else:
+                StructureTest.update(
+                    name=request.form["name"],
+                    description=request.form["description"],
+                    active=bool(request.form.get("active")),
+                ).where(StructureTest.id == structure_test_id).execute()
+                flash("Structure test updated")
         else:
             structure_test, created = StructureTest.get_or_create(
                 name=request.form["name"], description=request.form["description"]
@@ -212,9 +213,8 @@ def structure_test(structure_test_id=None):
                 flash(f"Added Structure Test '{ structure_test.name }'")
             else:
                 flash("Structure test already exists")
-            return redirect(
-                url_for("structure_test", structure_test_id=structure_test.id)
-            )
+
+        return redirect(url_for("structure_tests"))
 
     if structure_test_id:
         structure_test = StructureTest.get(StructureTest.id == structure_test_id)
@@ -418,7 +418,16 @@ def worker(worker_id):
             update[Worker.organizing_dept_id] = request.form["organizing_dept"]
 
         Worker.update(update).where(Worker.id == worker_id).execute()
+
         flash("Worker data updated")
+        return redirect(
+            url_for(
+                "department",
+                department_slug=Department.select(Department.slug)
+                .where(Department.id == request.form["organizing_dept"])
+                .scalar(),
+            )
+        )
 
     worker = Worker.get(Worker.id == worker_id)
 
