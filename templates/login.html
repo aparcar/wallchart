@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2 class="p-2 text-left display-5">Login</h2>
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-  <form action="{{ url_for('login') }}" method=post>
+<h2 class="p-2 text-left display-5">Login</h2>
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+<form action="{{ url_for('login') }}" method=post>
     <dl>
-      <dt>E-Mail:
-      <dd><input type=text name=email>
-      <dt>Password:
-      <dd><input type=password name=password>
-      <dd><input type=submit value=Login>
+        <dt>E-Mail:
+        <dd><input type=text name=email>
+        <dt>Password:
+        <dd><input type=password name=password>
+        <dd><input type=submit value=Login>
     </dl>
-  </form>
+</form>
 {% endblock %}

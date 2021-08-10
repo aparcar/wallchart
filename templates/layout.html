@@ -1,86 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Wallchart</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.min.css') }}">
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('homepage') }} "
-          >Wallchart</a
-        >
-        {% if session.logged_in %}
-        <button
-          class="navbar-toggler collapsed"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div
-          class=" navbar-collapse collapse"
-          id="navbarSupportedContent"
-        >
-          <ul class="navbar-nav me-auto">
-            {% if session.department_id == 0 %}
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                id="navbarDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                >Admin</a
-              >
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="{{ url_for('admin') }}">Overview</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('units') }}">Manage Units</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('users') }}">Manage Users</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('upload_record') }}">Upload Record</a></li>
-                <li><a class="dropdown-item" href="{{ url_for('download_db') }}">Backup Database</a></li>
-              </ul>
-            </li>
-            {% endif %}
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('structure_tests') }}">
-                Structure Tests</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('departments') }}">
-                Departments</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('find_worker') }}">
-                Find Worker</a
-              >
-            </li>
-          </ul>
+</head>
 
-          <a  href="{{ url_for('logout') }}">Log out</a>
-          {% else %}
-          <a  href="{{ url_for('login') }}">Log in</a>
-          {% endif %}
-      </div>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('homepage') }} ">Wallchart</a>
+            {% if session.logged_in %}
+            <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class=" navbar-collapse collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto">
+                    {% if session.department_id == 0 %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('admin') }}">Overview</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('units') }}">Manage Units</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('users') }}">Manage Users</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('upload_record') }}">Upload Record</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('download_db') }}">Backup Database</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('structure_tests') }}">
+                            Structure Tests</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('departments') }}">
+                            Departments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('find_worker') }}">
+                            Find Worker</a>
+                    </li>
+                </ul>
+
+                <a href="{{ url_for('logout') }}">Log out</a>
+                {% else %}
+                <a href="{{ url_for('login') }}">Log in</a>
+                {% endif %}
+            </div>
     </nav>
 
     <div class="page container">
-      {% for message in get_flashed_messages() %}
-      <div class="alert alert-primary">{{ message }}</div>
-      {% endfor %} {% block body %}{% endblock %}
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-primary">{{ message }}</div>
+        {% endfor %} {% block body %}{% endblock %}
     </div>
-  </body>
-  <script>
+</body>
+<script>
     const toggleBurgerButton = document.querySelector(".navbar-toggler");
     const toggleBurgerIcon = document.querySelector(".navbar-toggler-icon");
     const toggleAdminMenu = document.querySelector(".dropdown-menu");
@@ -88,35 +66,36 @@
     const navbar = document.querySelector(".navbar");
 
     navbar.addEventListener("click", (e) => {
-      console.log(
-        e.target === toggleBurgerButton || e.target === toggleBurgerIcon
-      );
-      if (e.target === toggleBurgerButton || e.target === toggleBurgerIcon) {
-        const navMenu = document.querySelector(".navbar-collapse");
-        navMenu.classList.toggle("show");
-        toggleBurgerButton.classList.toggle("collapsed");
-        if (!navMenu.classList.contains("show")) {
-          toggleAdminButton.classList.remove("show");
-          toggleAdminMenu.classList.remove("show");
+        console.log(
+            e.target === toggleBurgerButton || e.target === toggleBurgerIcon
+        );
+        if (e.target === toggleBurgerButton || e.target === toggleBurgerIcon) {
+            const navMenu = document.querySelector(".navbar-collapse");
+            navMenu.classList.toggle("show");
+            toggleBurgerButton.classList.toggle("collapsed");
+            if (!navMenu.classList.contains("show")) {
+                toggleAdminButton.classList.remove("show");
+                toggleAdminMenu.classList.remove("show");
+            }
         }
-      }
-      if (e.target === toggleAdminButton) {
-        toggleAdminButton.classList.toggle("show");
-        toggleAdminMenu.classList.toggle("show");
-      }
+        if (e.target === toggleAdminButton) {
+            toggleAdminButton.classList.toggle("show");
+            toggleAdminMenu.classList.toggle("show");
+        }
     });
 
     const currentLocation = window.location;
     const navLinks = Array.from(document.querySelectorAll(".nav-link"));
     navLinks.map((link, index) => {
-      if (currentLocation.href === "/") {
-        navLinks[0].classList.add("active");
-        navLinks[0].setAttribute("aria-current", "page");
-      } else if (currentLocation.href.includes(link.href)) {
-        navLinks[0].classList.remove("active");
-        navLinks[index].classList.add("active");
-        navLinks[index].setAttribute("aria-current", "page");
-      }
+        if (currentLocation.href === "/") {
+            navLinks[0].classList.add("active");
+            navLinks[0].setAttribute("aria-current", "page");
+        } else if (currentLocation.href.includes(link.href)) {
+            navLinks[0].classList.remove("active");
+            navLinks[index].classList.add("active");
+            navLinks[index].setAttribute("aria-current", "page");
+        }
     });
-  </script>
+</script>
+
 </html>

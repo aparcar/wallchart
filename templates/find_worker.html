@@ -2,78 +2,76 @@
 <h2 class="text-left display-5">Find Worker</h2>
 
 <div class="input mb-3">
-  <label for="find_worker" class="form-label"
-    >Type to search for a Worker:</label
-  >
-  <input id="find_worker" class="form-control" type="search" placeholder="Name, email or phone"></input>
+    <label for="find_worker" class="form-label">Type to search for a Worker:</label>
+    <input id="find_worker" class="form-control" type="search" placeholder="Name, email or phone"></input>
 </div>
 <div class="table-container"></div>
 
 <script src="{{ url_for('static', filename='fuse.js') }}"></script>
 <script src="{{ url_for('static', filename='axios.min.js') }}"></script>
 <script>
-  const endpoint = "/api/workers";
+    const endpoint = "/api/workers";
 
-  let state = {
-    isSearching: false,
-    foundResults: [],
-    searchString: "",
-  };
+    let state = {
+        isSearching: false,
+        foundResults: [],
+        searchString: "",
+    };
 
-  const request = axios
-    .get(endpoint)
-    .then((response) => {
-      const data = response.data;
-      return data;
-    })
-    .catch(function (error) {
-      console.log(error);
-    })
-    .then(function (data) {
-      const input = document.querySelector("input");
+    const request = axios
+        .get(endpoint)
+        .then((response) => {
+            const data = response.data;
+            return data;
+        })
+        .catch(function(error) {
+            console.log(error);
+        })
+        .then(function(data) {
+            const input = document.querySelector("input");
 
-      input.addEventListener("input", (e) => runSearch(e));
+            input.addEventListener("input", (e) => runSearch(e));
 
-      function runSearch(e) {
-        e.preventDefault();
-        const searchString = e.currentTarget.value;
+            function runSearch(e) {
+                e.preventDefault();
+                const searchString = e.currentTarget.value;
 
-        const fuse = new Fuse(data, {
-          includeScore: true,
-          threshold: 0.5,
-          keys: ["name", "phone", "email"],
-        });
+                const fuse = new Fuse(data, {
+                    includeScore: true,
+                    threshold: 0.5,
+                    keys: ["name", "phone", "email"],
+                });
 
-        state.searchString = searchString.trim();
+                state.searchString = searchString.trim();
 
-        state.foundResults = Array.from(fuse.search(searchString));
+                state.foundResults = Array.from(fuse.search(searchString));
 
-        state.isSearching = true;
+                state.isSearching = true;
 
-        dispatch(state);
-      }
+                dispatch(state);
+            }
 
-      function dispatch(state) {
-        if (state.isSearching) {
-          generateHtml(state);
-        }
-      }
+            function dispatch(state) {
+                if (state.isSearching) {
+                    generateHtml(state);
+                }
+            }
 
-      function generateHtml(state) {
-        const tableContainer = document.querySelector(".table-container");
-        if (!state.searchString) {
-          tableContainer.innerHTML = "";
-          state.isSearching = false;
-          dispatch(state);
-        }
-        if (!state.foundResults.length && state.searchString !== ""){
-          tableContainer.innerHTML = "No results, please refine your search.";
-          state.isSearching = false;
-          dispatch(state);
-        }
-        if (state.foundResults.length && state.searchString) {
-          state.foundResults = state.foundResults.slice(0, 10);
-          const html = `
+            function generateHtml(state) {
+                const tableContainer = document.querySelector(".table-container");
+                if (!state.searchString) {
+                    tableContainer.innerHTML = "";
+                    state.isSearching = false;
+                    dispatch(state);
+                }
+                if (!state.foundResults.length && state.searchString !== "") {
+                    tableContainer.innerHTML = "No results, please refine your search.";
+                    state.isSearching = false;
+                    dispatch(state);
+                }
+                if (state.foundResults.length && state.searchString) {
+                    state.foundResults = state.foundResults.slice(0, 10);
+                    const html = `
     <table class="table table-striped table-hover">
     <thead>
       <tr>
@@ -85,26 +83,39 @@
     </thead>
     <tbody class="table-row">${state.foundResults
       .map(
-        ({ item }) => `
-		  <tr>
-		  <td scope="row">
-			<a href="/worker/${item.id}">${item.name}</a></td>
-			<td scope="row">
-			<a href="/department/${item.department_slug}">${item.department_name}</a></td>
-			<td scope="row">
-			${item.phone === null ? "Unknown" : item.phone}</td>
-			<td scope="row">
-			${item.email === null ? "Unknown" : item.email}</td></tr>`
+        ({ item }) => ` <
+                        tr >
+                        <
+                        td scope = "row" >
+                        <
+                        a href = "/worker/${item.id}" > $ {
+                            item.name
+                        } < /a></td >
+                        <
+                        td scope = "row" >
+                        <
+                        a href = "/department/${item.department_slug}" > $ {
+                            item.department_name
+                        } < /a></td >
+                        <
+                        td scope = "row" >
+                        $ {
+                            item.phone === null ? "Unknown" : item.phone
+                        } < /td> <
+                        td scope = "row" >
+                        $ {
+                            item.email === null ? "Unknown" : item.email
+                        } < /td></tr > `
       )
       .join(" ")}</tbody>
   </table>`;
-          state.foundResults = [];
-          state.isSearching = false;
-          state.searchString = "";
-          return (tableContainer.innerHTML = html);
-        }
-      }
-    });
+                    state.foundResults = [];
+                    state.isSearching = false;
+                    state.searchString = "";
+                    return (tableContainer.innerHTML = html);
+                }
+            }
+        });
 </script>
 
 {% endblock %}

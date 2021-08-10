@@ -1,36 +1,36 @@
 {% extends "layout.html" %}
 {% block body %}
-<h2 class="p-2 text-left display-5" >Users</h2>
+<h2 class="p-2 text-left display-5">Users</h2>
 <p>
-Create units.
+    Create units.
 </p>
 <h3>
-	Existing units
+    Existing units
 </h3>
 <ul>
-	{% for unit in units %}
-	<li>{{ unit.name }}</li>
-	{% if unit.departments %}
-	<ul>
-		{% for department in unit.departments %}
-		<li><a href="{{ url_for("workers", department_slug=department.slug) }}">
-				{{ department.name }}
-				<a/>
-		</li>
-		{% endfor %}
-	</ul>
-	{% endif %}
-	</li>
-	{% endfor %}
+    {% for unit in units %}
+    <li>{{ unit.name }}</li>
+    {% if unit.departments %}
+    <ul>
+        {% for department in unit.departments %}
+        <li><a href="{{ url_for("workers", department_slug=department.slug) }}">
+                {{ department.name }}
+                <a />
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    </li>
+    {% endfor %}
 </ul>
 
 <h3>
-	Create new unit
+    Create new unit
 </h3>
 <form action="{{ url_for("units") }}" method=post>
-	<label for="name">Name</label>
-	<input name="name" type="text" value="" />
-	<input type="submit" value="Create unit" />
+    <label for="name">Name</label>
+    <input name="name" type="text" value="" />
+    <input type="submit" value="Create unit" />
 </form>
 
 {% endblock %}

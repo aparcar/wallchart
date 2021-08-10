@@ -2,49 +2,46 @@
 {% block body %}
 <h2 class="p-2 text-left display-5">Users</h2>
 <p>
-Create and modify users which can login and have access to a specific department.
+    Create and modify users which can login and have access to a specific department.
 </p>
 <h3>
-	Existing users
+    Existing users
 </h3>
 {% for user in users %}
 <form action="{{ url_for("users") }}" method=post autocomplete="off">
-	<label for="email">E-Mail</label>
-	<input name="email" type="text" value="{{ user.email }}" />
-	<label for="password">Password</label>
-	<input name="password" type="password" placeholder="Unchanged"  autocomplete="off"/>
-	<input name="id" type="hidden" value="{{ user.id }}" />
-	<select name="department">
-		{% for department in departments %}
-		<option
-			value="{{ department.id }}"
-			{% if user.department_id == department.id %}selected="selected"{% endif %}
-			>
-			{{ user.chair }}
-			{{ department.name }}
-		</option>
-		{% endfor %}
-	</select>
-	<input type="submit" value="Update user" />
+    <label for="email">E-Mail</label>
+    <input name="email" type="text" value="{{ user.email }}" />
+    <label for="password">Password</label>
+    <input name="password" type="password" placeholder="Unchanged" autocomplete="off" />
+    <input name="id" type="hidden" value="{{ user.id }}" />
+    <select name="department">
+        {% for department in departments %}
+        <option value="{{ department.id }}" {% if user.department_id == department.id %}selected="selected" {% endif %}>
+            {{ user.chair }}
+            {{ department.name }}
+        </option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Update user" />
 </form>
 {% endfor %}
 
 <h3>
-	Create new user
+    Create new user
 </h3>
 <form action="{{ url_for("users") }}" method=post>
-	<label for="email">E-Mail</label>
-	<input name="email" type="text" value="" />
-	<label for="password">Password</label>
-	<input name="password" type="password" value="" autocomplete="off" />
-	<select name="department">
-		{% for department in departments %}
-		<option value="{{ department.id }}">
-		{{ department.name }}
-		</option>
-		{% endfor %}
-	</select>
-	<input type="submit" value="Create user" />
+    <label for="email">E-Mail</label>
+    <input name="email" type="text" value="" />
+    <label for="password">Password</label>
+    <input name="password" type="password" value="" autocomplete="off" />
+    <select name="department">
+        {% for department in departments %}
+        <option value="{{ department.id }}">
+            {{ department.name }}
+        </option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Create user" />
 </form>
 
 {% endblock %}
