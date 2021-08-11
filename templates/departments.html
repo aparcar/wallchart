@@ -9,6 +9,7 @@
     </tr>
     {% for department in departments %}
     <tr>
+        {% if department.worker_count > 0 %}
         <td>
             <a href="{{ url_for('department', department_slug=department.slug) }}">
                 {% if department.alias %}
@@ -20,10 +21,38 @@
             </a>
         </td>
 	<td>
+	  {% if department.worker_count > 0 %}
           {% set percentage = ( department.participation / department.worker_count * 100) | round(2) %}
+	  {% endif %}
           <meter low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
 	</td>
         <td>{{ department.chair | join(', ', attribute="email") }}</td>
+	{% endif %}
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Empty Departments</h3>
+<p>
+    All workers of these departments are organized in different departments
+</p>
+<table class="table table-striped table-hover">
+    <tr>
+        <th scope="col">Name</th>
+    </tr>
+    {% for department in departments %}
+    <tr>
+        {% if department.worker_count == 0 %}
+        <td>
+            <a href="{{ url_for('department', department_slug=department.slug) }}">
+                {% if department.alias %}
+                <b>{{ department.alias }}</b> ({{ department.name }})
+                {% else %}
+                <b>{{ department.name }}</b>
+                {% endif %}
+            </a>
+        </td>
+	{% endif %}
     </tr>
     {% endfor %}
 </table>

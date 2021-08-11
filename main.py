@@ -271,7 +271,7 @@ def departments():
             fn.count(Worker.id).alias("worker_count"),
             fn.count(Participation.id).alias("participation"),
         )
-        .join(Worker, on=(Department.id == Worker.organizing_dept_id))
+        .join(Worker, JOIN.LEFT_OUTER, on=(Department.id == Worker.organizing_dept_id))
         .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
         .join(
             StructureTest,
