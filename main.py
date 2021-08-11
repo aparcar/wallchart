@@ -24,6 +24,7 @@ from peewee import (
     BooleanField,
     CharField,
     DateField,
+    Case,
     ForeignKeyField,
     IntegerField,
     Model,
@@ -265,12 +266,14 @@ def units():
 @app.route("/departments/")
 @login_required
 def departments():
-    departments = (
+    units = (
         Department.select(
             Department,
+            Case(None, ((Unit.name.is_null(), "No Unit"),), Unit.name).alias("unit_name"),
             fn.count(Worker.id).alias("worker_count"),
             fn.count(Participation.id).alias("participation"),
         )
+        .join(Unit, JOIN.LEFT_OUTER, on=(Department.unit == Unit.id))
         .join(Worker, JOIN.LEFT_OUTER, on=(Department.id == Worker.organizing_dept_id))
         .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
         .join(
@@ -281,10 +284,10 @@ def departments():
         .group_by(Department.id)
         .order_by(Department.name)
     )
-    department_count = len(departments)
+    department_count = len(units)
     return render_template(
         "departments.html",
-        departments=departments,
+        units=units,
         department_count=department_count,
     )
 
