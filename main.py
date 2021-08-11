@@ -22,9 +22,9 @@ from flask import (
 from peewee import (
     JOIN,
     BooleanField,
+    Case,
     CharField,
     DateField,
-    Case,
     ForeignKeyField,
     IntegerField,
     Model,
@@ -212,7 +212,7 @@ def structure_test(structure_test_id=None):
                 name=request.form["name"], description=request.form["description"]
             )
             if created:
-                flash(f"Added Structure Test \"{ structure_test.name }\"")
+                flash(f'Added Structure Test "{ structure_test.name }"')
             else:
                 flash("Structure test with same name already exists")
 
@@ -262,7 +262,11 @@ def units():
             )
             flash(f"Unit \"{ request.form['name'] }\" created")
         elif action == "delete":
-            Unit.delete().where(Unit.id == request.args.get("unit_id")).execute()
+            unit_id = request.args.get("unit_id")
+            Unit.delete().where(Unit.id == unit_id).execute()
+            Department.update({Department.unit: None}).where(
+                Department.unit == unit_id
+            ).execute()
             flash(f"Unit deleted")
 
     units = Unit.select().group_by(Unit.name)
