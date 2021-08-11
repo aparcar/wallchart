@@ -10,8 +10,8 @@
         <th scope="col">Chair</th>
     </tr>
     {% for department in departments %}
+    {% if department.worker_count > 0 %}
     <tr>
-        {% if department.worker_count > 0 %}
         <td>
             <a href="{{ url_for('department', department_slug=department.slug) }}">
                 {% if department.alias %}
@@ -29,8 +29,8 @@
           <meter low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
 	</td>
         <td>{{ department.chair | join(', ', attribute="email") }}</td>
-	{% endif %}
     </tr>
+    {% endif %}
     {% endfor %}
 </table>
 {% endfor %}
@@ -44,8 +44,8 @@
         <th scope="col">Name</th>
     </tr>
     {% for department in units %}
+    {% if department.worker_count == 0 %}
     <tr>
-        {% if department.worker_count == 0 %}
         <td>
             <a href="{{ url_for('department', department_slug=department.slug) }}">
                 {% if department.alias %}
@@ -55,8 +55,8 @@
                 {% endif %}
             </a>
         </td>
-	{% endif %}
     </tr>
+    {% endif %}
     {% endfor %}
 </table>
 {% endblock %}
