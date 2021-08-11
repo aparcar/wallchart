@@ -13,7 +13,7 @@
     {% if unit.departments %}
     <ul>
         {% for department in unit.departments %}
-        <li><a href="{{ url_for("workers", department_slug=department.slug) }}">
+        <li><a href="{{ url_for("department", department_slug=department.slug) }}">
                 {{ department.name }}
                 <a />
         </li>
