@@ -1,40 +1,50 @@
 {% extends "layout.html" %}
 {% block body %}
 <h2 class="p-2 text-left display-5">Structure Tests</h2>
-<div class="row row-cols-1 row-cols-md-2 g-4">
-    <div class="col">
-        <div class="card">
-            <div class="card-body">
-                <a href="{{ url_for("structure_test") }}">
-                    <h5 class="card-title">Add Structure Test</h5>
-                </a>
-            </div>
+<div class="col">
+    <div class="card">
+        <div class="card-body">
+            <a href="{{ url_for("structure_test", action="create") }}">
+                <h5 class="card-title">Add Structure Test</h5>
+            </a>
         </div>
     </div>
-    <table class="table table-striped table-hover">
-        <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Active</th>
-            <th>Added</th>
-            <th>Participation</th>
-        </tr>
-        {% for structure_test in structure_tests %}
-        <tr>
-            <td>
-                <a href="{{ url_for('structure_test', structure_test_id=structure_test.id) }}">
-                    {{ structure_test.name }}
-                </a>
-            </td>
-            <td>{{ structure_test.description}}</td>
-            <td>{{ structure_test.active }}</td>
-            <td>{{ structure_test.added }}</td>
-            <td>
-                {% set percentage = (structure_test.participation / worker_count * 100) | round(2) %}
-                <meter low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
-                {{ structure_test.participation }} ({{ percentage }}%)
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% endblock %}
+</div>
+<table class="table table-striped table-hover">
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Active</th>
+        <th>Added</th>
+        <th>Participation</th>
+        <th></th>
+    </tr>
+    {% for structure_test in structure_tests %}
+    <tr>
+        <td>
+            <a href="{{ url_for('structure_test', structure_test_id=structure_test.id) }}">
+                {{ structure_test.name }}
+            </a>
+        </td>
+        <td>{{ structure_test.description}}</td>
+        <td>{{ structure_test.active }}</td>
+        <td>{{ structure_test.added }}</td>
+        <td>
+            {% set percentage = (structure_test.participation / worker_count * 100) | round(2) %}
+            <meter low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
+            {{ structure_test.participation }} ({{ percentage }}%)
+        </td>
+        <td>
+            <form class="form-inline" action="{{ url_for('structure_test', action="delete", structure_test_id=structure_test.id) }}" method=post>
+                <button type="submit" class="btn btn-sm" onclick="return confirm('Do you really want to delete {{ structure_test.name }}');">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                    </svg>
+                </button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

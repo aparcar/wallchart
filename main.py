@@ -191,7 +191,8 @@ def admin():
 def structure_test(structure_test_id=None):
     if request.method == "POST":
         if structure_test_id:
-            if request.form.get("delete"):
+            action = request.args.get("action")
+            if action == "delete":
                 StructureTest.delete().where(
                     StructureTest.id == structure_test_id
                 ).execute()
@@ -199,7 +200,7 @@ def structure_test(structure_test_id=None):
                     Participation.structure_test == structure_test_id,
                 ).execute()
                 flash("Deleted Structure Test")
-            else:
+            elif action == "create":
                 StructureTest.update(
                     name=request.form["name"],
                     description=request.form["description"],
@@ -211,9 +212,9 @@ def structure_test(structure_test_id=None):
                 name=request.form["name"], description=request.form["description"]
             )
             if created:
-                flash(f"Added Structure Test '{ structure_test.name }'")
+                flash(f"Added Structure Test \"{ structure_test.name }\"")
             else:
-                flash("Structure test already exists")
+                flash("Structure test with same name already exists")
 
         return redirect(url_for("structure_tests"))
 
@@ -253,11 +254,16 @@ def login():
 @login_required
 def units():
     if request.method == "POST":
-        Unit.create(
-            name=request.form["name"],
-            slug=slugify(request.form["name"]),
-        )
-        flash("Unit created")
+        action = request.args.get("action")
+        if action == "create":
+            Unit.create(
+                name=request.form["name"],
+                slug=slugify(request.form["name"]),
+            )
+            flash(f"Unit \"{ request.form['name'] }\" created")
+        elif action == "delete":
+            Unit.delete().where(Unit.id == request.args.get("unit_id")).execute()
+            flash(f"Unit deleted")
 
     units = Unit.select().group_by(Unit.name)
     return render_template("units.html", units=units)
@@ -269,7 +275,9 @@ def departments():
     units = (
         Department.select(
             Department,
-            Case(None, ((Unit.name.is_null(), "No Unit"),), Unit.name).alias("unit_name"),
+            Case(None, ((Unit.name.is_null(), "No Unit"),), Unit.name).alias(
+                "unit_name"
+            ),
             fn.count(Worker.id).alias("worker_count"),
             fn.count(Participation.id).alias("participation"),
         )

@@ -22,12 +22,12 @@
                 ({{ department.worker_count }})
             </a>
         </td>
-	<td>
-	  {% if department.worker_count > 0 %}
-          {% set percentage = ( department.participation / department.worker_count * 100) | round(2) %}
-	  {% endif %}
-          <meter low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
-	</td>
+        <td>
+            {% if department.worker_count > 0 %}
+            {% set percentage = ( department.participation / department.worker_count * 100) | round(2) %}
+            {% endif %}
+            <meter low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
+        </td>
         <td>{{ department.chair | join(', ', attribute="email") }}</td>
     </tr>
     {% endif %}
