@@ -506,15 +506,17 @@ def worker(worker_id):
 def users():
     if request.method == "POST":
         Worker.update(
-            dept_chair_id=request.form["dept_chair_id"] or None,
             unit_chair_id=request.form["unit_chair_id"] or None,
         ).where(Worker.id == request.args.get("user_id")).execute()
         print(request.form)
         flash("User updated")
 
-    users = Worker.select().where(Worker.password.is_null(False))
-    print(list(users.dicts()))
-    departments = Department.select().order_by(Department.name)
+    users = list(
+        Worker.select(Worker, Department.name.alias("department_name"))
+        .join(Department, on=(Worker.organizing_dept_id == Department.id))
+        .where(Worker.password.is_null(False))
+        .dicts()
+    )
     units = Unit.select().order_by(Unit.name)
     return render_template(
         "users.html", users=users, units=units, departments=departments

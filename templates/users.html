@@ -11,8 +11,8 @@
     <thead>
         <tr>
             <th scope="col">Name</th>
-            <th scope="col">Organizes Unit</th>
             <th scope="col">Organizes Department</th>
+            <th scope="col">Organizes Unit</th>
             <th scope="col"></th>
         </tr>
     </thead>
@@ -26,6 +26,9 @@
             </td>
             <form class="form-inline" action="{{ url_for('users', user_id=user.id) }}" method="post">
                 <td>
+			{{ user.department_name }}
+                </td>
+                <td>
                     <select name="unit_chair_id">
                         <option value="">None</option>
                         {% for unit in units %}
@@ -34,18 +37,6 @@
                         </option>
                         {% endfor %}
                     </select>
-                </td>
-                <td>
-
-                    <select name="dept_chair_id">
-                        <option value="">None</option>
-                        {% for department in departments %}
-			<option value="{{ department.id }}" {% if user.dept_chair_id.id == department.id %}selected="selected" {% endif %}>
-                            {{ department.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-
                 </td>
                 <td>
                     <button type="submit" class="btn btn-sm">
