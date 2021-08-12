@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2 class="p-2 text-left display-5">Users</h2>
+<p>
+    Create units.
+</p>
+<h3>
+    Existing units
+</h3>
+<ul>
+    {% for unit in units %}
+    <li>
+        <form class="form-inline" action="{{ url_for('units', action="delete", unit_id=unit.id) }}" method=post>
+            {{ unit.name }}
+            <button type="submit" class="btn btn-sm" onclick="return confirm('Do you really want to delete {{ unit.name }}');">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                </svg>
+            </button>
+        </form>
+    </li>
+    {% if unit.departments %}
+    <ul>
+        {% for department in unit.departments %}
+        <li><a href="{{ url_for("department", department_slug=department.slug) }}">
+                {% if department.alias %}
+                <b>{{ department.alias }}</b> ({{ department.name }})
+                {% else %}
+                <b>{{ department.name }}</b>
+                {% endif %}
+                <a />
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+
+<h3>
+    Create new unit
+</h3>
+<form action="{{ url_for("units", action="create") }}" method=post>
+    <label for="name">Name</label>
+    <input name="name" type="text" value="" />
+    <input type="submit" value="Create unit" />
+</form>
+
+{% endblock %}

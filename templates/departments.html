@@ -31,7 +31,9 @@
         <td>
 
 		{% for chair in department.chairs %}
+		{% if not chair.unit_chair_id %}
 		<a href="{{ url_for("worker", worker_id=chair.id) }}">{{ chair.name }}</a>
+		{% endif %}
 		{% endfor %}
 	</td>
     </tr>

@@ -271,6 +271,28 @@ def login():
     return render_template("login.html"), status
 
 
+@app.route("/units/")
+@login_required
+def units_view():
+    units = (
+        Unit.select(
+            Unit,
+            fn.count(Worker.id).alias("worker_count"),
+            fn.count(Participation.id).alias("participation"),
+        )
+        .join(Department, JOIN.LEFT_OUTER, on=(Department.unit == Unit.id))
+        .join(Worker, JOIN.LEFT_OUTER, on=(Department.id == Worker.organizing_dept_id))
+        .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
+        .join(
+            StructureTest,
+            JOIN.LEFT_OUTER,
+            on=(Participation.structure_test == StructureTest.id),
+        )
+        .group_by(Unit.id)
+    )
+    return render_template("units.html", units=units)
+
+
 @app.route("/manage-units/", methods=["GET", "POST"])
 @login_required
 def units():
@@ -292,7 +314,7 @@ def units():
             flash(f"Unit deleted")
 
     units = Unit.select().group_by(Unit.name)
-    return render_template("units.html", units=units)
+    return render_template("units_edit.html", units=units)
 
 
 @app.route("/departments/")
@@ -456,6 +478,7 @@ def worker(worker_id):
             if request.form.get("password"):
                 if request.form.get("email"):
                     update[Worker.password] = bcryptify(request.form["password"])
+                    update[Worker.dept_chair_id] = request.form["organizing_dept"]
                     flash("Added as user")
                 else:
                     flash("If setting a password a email address is required, too")
@@ -509,7 +532,6 @@ def users():
             unit_chair_id=request.form["unit_chair_id"] or None,
         ).where(Worker.id == request.args.get("user_id")).execute()
         flash("User updated")
-
 
     users = list(
         Worker.select(Worker, Department.name.alias("department_name"))
