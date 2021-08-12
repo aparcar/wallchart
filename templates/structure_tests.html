@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <h2 class="p-2 text-left display-5">Structure Tests</h2>
+{% if session.admin %}
 <div class="col">
     <div class="card">
         <div class="card-body">
@@ -10,6 +11,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 <table class="table table-striped table-hover">
     <tr>
         <th>Name</th>
@@ -22,9 +24,13 @@
     {% for structure_test in structure_tests %}
     <tr>
         <td>
+	  {% if session.admin %}
             <a href="{{ url_for('structure_test', structure_test_id=structure_test.id) }}">
                 {{ structure_test.name }}
             </a>
+	    {% else %}
+                {{ structure_test.name }}
+	    {% endif %}
         </td>
         <td>{{ structure_test.description}}</td>
         <td>{{ structure_test.active }}</td>
@@ -35,6 +41,7 @@
             {{ structure_test.participation }} ({{ percentage }}%)
         </td>
         <td>
+	    {% if session.admin %}
             <form class="form-inline" action="{{ url_for('structure_test', action="delete", structure_test_id=structure_test.id) }}" method=post>
                 <button type="submit" class="btn btn-sm" onclick="return confirm('Do you really want to delete {{ structure_test.name }}');">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
@@ -43,6 +50,7 @@
                     </svg>
                 </button>
             </form>
+	    {% endif %}
         </td>
     </tr>
     {% endfor %}

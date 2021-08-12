@@ -7,7 +7,7 @@
     <tr>
         <th scope="col" class="col-7">Name</th>
         <th scope="col" class="col-1">Participation</th>
-        <th scope="col">Chair</th>
+        <th scope="col">Chair(s)</th>
     </tr>
     {% for department in departments %}
     {% if department.worker_count > 0 %}
@@ -26,9 +26,14 @@
             {% if department.worker_count > 0 %}
             {% set percentage = ( department.participation / department.worker_count * 100) | round(2) %}
             {% endif %}
-            <meter low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
+            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
         </td>
-        <td>{{ department.chair | join(', ', attribute="email") }}</td>
+        <td>
+
+		{% for chair in department.chairs %}
+		<a href="{{ url_for("worker", worker_id=chair.id) }}">{{ chair.name }}</a>
+		{% endfor %}
+	</td>
     </tr>
     {% endif %}
     {% endfor %}

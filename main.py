@@ -47,6 +47,8 @@ SECRET_KEY = config["flask"]["secret"]
 
 assert SECRET_KEY != "changeme", "Change flask secret in config.ini"
 
+assert config["admin"]["password"] != "changeme", "Change admin password in config.ini"
+
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -57,25 +59,6 @@ database = SqliteDatabase(DATABASE)
 class BaseModel(Model):
     class Meta:
         database = database
-
-
-class Worker(BaseModel):
-    name = CharField()
-    preferred_name = CharField(null=True)
-    pronouns = CharField(null=True)
-    email = CharField(unique=True, null=True)
-    phone = IntegerField(unique=True, null=True)
-    notes = TextField(null=True)
-    contract = CharField()
-    unit = CharField()
-    department_id = IntegerField()
-    organizing_dept_id = IntegerField()
-    active = BooleanField(default=True)
-    added = DateField(default=date.today)
-    updated = DateField(default=date.today)
-
-    class Meta:
-        indexes = ((("name", "unit", "department_id", "contract"), True),)
 
 
 class Unit(BaseModel):
@@ -90,10 +73,28 @@ class Department(BaseModel):
     unit = ForeignKeyField(Unit, backref="departments", null=True)
 
 
-class User(BaseModel):
-    email = CharField(unique=True)
-    password = CharField()
-    department = ForeignKeyField(Department, backref="chair", null=True)
+class Worker(BaseModel):
+    name = CharField()
+    preferred_name = CharField(null=True)
+    pronouns = CharField(null=True)
+    email = CharField(unique=True, null=True)
+    phone = IntegerField(unique=True, null=True)
+    notes = TextField(null=True)
+    contract = CharField()
+    unit = CharField()
+    department_id = IntegerField()
+    organizing_dept_id = IntegerField()
+    unit_chair_id = ForeignKeyField(Unit, field=Unit.id, backref="chairs", null=True)
+    dept_chair_id = ForeignKeyField(
+        Department, field=Department.id, backref="chairs", null=True
+    )
+    active = BooleanField(default=True)
+    added = DateField(default=date.today)
+    updated = DateField(default=date.today)
+    password = CharField(null=True)
+
+    class Meta:
+        indexes = ((("name", "unit", "department_id", "contract"), True),)
 
 
 class StructureTest(BaseModel):
@@ -114,22 +115,26 @@ class Participation(BaseModel):
 
 def create_tables():
     with database:
-        database.create_tables(
-            [Worker, Unit, Department, User, StructureTest, Participation]
-        )
+        database.create_tables([Unit, Department, Worker, StructureTest, Participation])
 
 
 def auth_user(user):
     session["logged_in"] = True
     session["user_id"] = user.id
     session["email"] = user.email
-    session["department_id"] = user.department.id
+    session["department_id"] = user.organizing_dept_id
+    if user.unit_chair_id:
+        session["admin"] = True
     flash(f"You are logged in as {user.email}")
 
 
 def get_current_user():
     if session.get("logged_in"):
-        return User.get(User.id == session["user_id"])
+        return Worker.get(Worker.id == session["user_id"])
+
+
+def is_admin():
+    return session.get("admin", False)
 
 
 def login_required(f):
@@ -157,7 +162,7 @@ def after_request(response):
 @app.route("/")
 def homepage():
     if session.get("logged_in"):
-        if session.get("department_id") == 0:
+        if is_admin():
             return redirect(url_for("admin"))
         else:
             return redirect(url_for("department"))
@@ -176,8 +181,7 @@ def download_db():
 
 @app.route("/admin")
 def admin():
-    # select departments but remove the pseudo "admin" department
-    department_count = Department.select(fn.count(Department.id)).scalar() - 1
+    department_count = Department.select(fn.count(Department.id)).scalar()
     worker_count = (
         Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
     )
@@ -237,11 +241,23 @@ def login():
     status = 200
     if request.method == "POST" and request.form["email"]:
         try:
-            pw_hash = sha256(request.form["password"].encode("utf-8")).hexdigest()
-            user = User.get(
-                (User.email == request.form["email"]) & (User.password == pw_hash)
-            )
-        except User.DoesNotExist:
+            if (
+                request.form["email"] == "admin"
+                and request.form["password"] == config["admin"]["password"]
+            ):
+                session["logged_in"] = True
+                session["user_id"] = 0
+                session["department_id"] = 0
+                session["admin"] = True
+                flash(f"You are logged in as administrator.")
+                return redirect(url_for("admin"))
+            else:
+                pw_hash = sha256(request.form["password"].encode("utf-8")).hexdigest()
+                user = Worker.get(
+                    (Worker.email == request.form["email"])
+                    & (Worker.password == pw_hash)
+                )
+        except Worker.DoesNotExist:
             status = 403
             flash("Wrong user or password")
         else:
@@ -250,7 +266,7 @@ def login():
     return render_template("login.html"), status
 
 
-@app.route("/units/", methods=["GET", "POST"])
+@app.route("/manage-units/", methods=["GET", "POST"])
 @login_required
 def units():
     if request.method == "POST":
@@ -261,6 +277,7 @@ def units():
                 slug=slugify(request.form["name"]),
             )
             flash(f"Unit \"{ request.form['name'] }\" created")
+            return redirect(url_for("admin"))
         elif action == "delete":
             unit_id = request.args.get("unit_id")
             Unit.delete().where(Unit.id == unit_id).execute()
@@ -294,7 +311,6 @@ def departments():
             on=(Participation.structure_test == StructureTest.id),
         )
         .group_by(Department.id)
-        .order_by(Department.name)
     )
     department_count = len(units)
     return render_template(
@@ -315,7 +331,7 @@ def department(department_slug=None):
 
     if request.method == "POST":
         # only admins can switch department alias
-        if session.get("department_id") == 0:
+        if is_admin():
             Department.update(alias=request.form["alias"]).where(
                 Department.slug == department_slug
             ).execute()
@@ -429,8 +445,17 @@ def worker(worker_id):
         }
 
         # only admins can switch worker departments
-        if session.get("department_id") == 0:
+        if is_admin():
             update[Worker.organizing_dept_id] = request.form["organizing_dept"]
+
+            if request.form.get("password"):
+                if request.form.get("email"):
+                    update[Worker.password] = sha256(
+                        request.form["password"].encode("utf-8")
+                    ).hexdigest()
+                    flash("Added as user")
+                else:
+                    flash("If setting a password a email address is required, too")
 
         Worker.update(update).where(Worker.id == worker_id).execute()
 
@@ -477,29 +502,20 @@ def worker(worker_id):
 @login_required
 def users():
     if request.method == "POST":
-        if request.form.get("id"):
-            update = {
-                User.email: request.form["email"],
-                User.department: request.form["department"],
-            }
-            if request.form.get("password"):
-                update[User.password] = sha256(
-                    request.form["password"].encode("utf-8")
-                ).hexdigest()
+        Worker.update(
+            dept_chair_id=request.form["dept_chair_id"] or None,
+            unit_chair_id=request.form["unit_chair_id"] or None,
+        ).where(Worker.id == request.args.get("user_id")).execute()
+        print(request.form)
+        flash("User updated")
 
-            User.update(update).where(User.id == request.form["id"]).execute()
-            flash("User updated")
-        else:
-            User.create(
-                email=request.form["email"],
-                password=sha256(request.form["password"].encode("utf-8")).hexdigest(),
-                department=request.form["department"],
-            )
-            flash("User created")
-
-    users = User.select()
+    users = Worker.select().where(Worker.password.is_null(False))
+    print(list(users.dicts()))
     departments = Department.select().order_by(Department.name)
-    return render_template("users.html", users=users, departments=departments)
+    units = Unit.select().order_by(Unit.name)
+    return render_template(
+        "users.html", users=users, units=units, departments=departments
+    )
 
 
 @app.route("/set-department-unit/<int:unit_id>/<int:department_id>")
@@ -514,10 +530,7 @@ def set_department_unit(unit_id, department_id):
 @app.route("/participation/<int:worker_id>/<int:structure_test_id>/<int:status>")
 def participation(worker_id, structure_test_id, status):
     worker = Worker.get(Worker.id == worker_id)
-    if (
-        session.get("department_id") == worker.organizing_dept_id
-        or session.get("department_id") == 0
-    ):
+    if session.get("department_id") == worker.organizing_dept_id or is_admin():
         if status == 1:
             Participation.create(worker=worker_id, structure_test=structure_test_id)
         else:
@@ -591,19 +604,5 @@ def parse_csv(csv_file_b):
 if __name__ == "__main__":
     if not Path(DATABASE).exists():
         create_tables()
-        Department.get_or_create(
-            id=0,
-            name="Admin",
-            slug="admin",
-        )
-        assert (
-            config["admin"]["password"] != "changeme"
-        ), "Change admin password in config.ini"
-
-        User.get_or_create(
-            email=config["admin"]["email"],
-            password=sha256(config["admin"]["password"].encode("utf-8")).hexdigest(),
-            department=0,
-        )
 
     app.run()

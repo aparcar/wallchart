@@ -8,12 +8,12 @@
     {% endif %}
     ({{ worker_count }})
 </h2>
-{% if session.department_id == 0 %}
+{% if session.admin %}
 <label for="unit">Unit:</label>
 <select name="unit" onchange="setDepartmentUnit(this);">
     <option value="">None</option>
     {%- for unit in units %}
-    <option value="{{ unit.id }}" {% if department.unit.id==unit.id %}selected="selected" {% endif %}>
+    <option value="{{ unit.id }}" {% if department.unit.id == unit.id %}selected="selected" {% endif %}>
         {{- unit.name -}}
     </option>
     {%- endfor %}
@@ -68,7 +68,13 @@
             <td>{% if worker.phone %}<a href="sms:{{ worker.phone }}">{{ worker.phone }}</a>{% else %}Unknown{% endif %}</td>
             {% for structure_test in structure_tests %}
             <th>
-                <input type="checkbox" data-worker="{{ worker.id }}" data-structure_test="{{ structure_test.id }}" name="{{ structure_test.name }}" onchange="toggleParticipation(this);" {{ "checked" if structure_test.id in worker.participated }}>
+                <input type="checkbox"
+			data-worker="{{ worker.id }}"
+			data-structure_test="{{ structure_test.id }}"
+			name="{{ structure_test.name }}"
+			onchange="toggleParticipation(this);"
+			{{ "checked" if structure_test.id in worker.participated }}
+			{{ "disabled" if (session.department_id != department.id) and not session.admin }}>
             </th>
             {% endfor %}
         </tr>

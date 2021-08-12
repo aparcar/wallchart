@@ -14,22 +14,21 @@
 </div>
 {% if structure_test %}
 <form action="{{ url_for("structure_test", structure_test_id=structure_test.id) }}" method=post>
-{% else %}
-<form action="{{ url_for("structure_test") }}" method=post>
-{% endif %}
-    <p>
-        <label for="name">Name</label>
-        <input name="name" type="text" value="{{ structure_test.name }}" />
-    </p>
-    <p>
-        <label for="description">Description</label>
-        <textarea name="description">{{ structure_test.description }}</textarea>
-    </p>
-    <p>
-        <label for="active">Active</label>
-        <input name="active" type="checkbox" value=True
-	   {{ "checked" if (structure_test.active or not structure_test) }} />
-    </p>
-    <input type="submit" value="{% if structure_test %}Update{% else %}Create{% endif %}" />
-</form>
-{% endblock %}
+    {% else %}
+    <form action="{{ url_for("structure_test") }}" method=post>
+        {% endif %}
+        <p>
+            <label for="name">Name</label>
+            <input name="name" type="text" value="{{ structure_test.name }}" />
+        </p>
+        <p>
+            <label for="description">Description</label>
+            <textarea name="description">{{ structure_test.description }}</textarea>
+        </p>
+        <p>
+            <label for="active">Active</label>
+            <input name="active" type="checkbox" value=True {{ "checked" if (structure_test.active or not structure_test) }} />
+        </p>
+        <input type="submit" value="{% if structure_test %}Update{% else %}Create{% endif %}" />
+    </form>
+    {% endblock %}
