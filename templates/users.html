@@ -31,8 +31,9 @@
                 <td>
                     <select name="unit_chair_id">
                         <option value="">None</option>
+			{% set user_unit = user.unit_chair_id %}
                         {% for unit in units %}
-                        <option value="{{ unit.id }}" {% if user.unit_chair_id.id == unit.id %}selected="selected" {% endif %}>
+                        <option value="{{ unit.id }}" {% if user_unit == unit.id %}selected="selected" {% endif %}>
                             {{ unit.name }}
                         </option>
                         {% endfor %}

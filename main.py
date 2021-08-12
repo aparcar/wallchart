@@ -508,8 +508,8 @@ def users():
         Worker.update(
             unit_chair_id=request.form["unit_chair_id"] or None,
         ).where(Worker.id == request.args.get("user_id")).execute()
-        print(request.form)
         flash("User updated")
+
 
     users = list(
         Worker.select(Worker, Department.name.alias("department_name"))
