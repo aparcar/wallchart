@@ -4,9 +4,9 @@ import io
 import logging
 from datetime import date
 from functools import wraps
-from hashlib import sha256
 from pathlib import Path
 
+import bcrypt
 from flask import (
     Flask,
     flash,
@@ -118,14 +118,8 @@ def create_tables():
         database.create_tables([Unit, Department, Worker, StructureTest, Participation])
 
 
-def auth_user(user):
-    session["logged_in"] = True
-    session["user_id"] = user.id
-    session["email"] = user.email
-    session["department_id"] = user.organizing_dept_id
-    if user.unit_chair_id:
-        session["admin"] = True
-    flash(f"You are logged in as {user.email}")
+def bcryptify(password: str):
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode("utf-8")
 
 
 def get_current_user():
@@ -240,29 +234,40 @@ def find_worker():
 def login():
     status = 200
     if request.method == "POST" and request.form["email"]:
-        try:
-            if (
-                request.form["email"] == "admin"
-                and request.form["password"] == config["admin"]["password"]
+        if (
+            request.form["email"] == "admin"
+            and request.form["password"] == config["admin"]["password"]
+        ):
+            session["logged_in"] = True
+            session["user_id"] = 0
+            session["department_id"] = 0
+            session["admin"] = True
+            flash(f"You are logged in as administrator.")
+            return redirect(url_for("admin"))
+        else:
+            user = Worker.get_or_none(Worker.email == request.form["email"])
+
+            if user and bcrypt.checkpw(
+                request.form.get("password", "").encode(), user.password.encode()
             ):
                 session["logged_in"] = True
-                session["user_id"] = 0
-                session["department_id"] = 0
-                session["admin"] = True
-                flash(f"You are logged in as administrator.")
-                return redirect(url_for("admin"))
+                session["user_id"] = user.id
+                session["email"] = user.email
+                session["department_id"] = user.organizing_dept_id
+                if user.unit_chair_id:
+                    session["admin"] = True
+                flash(f"You are logged in as {user.email}")
+                return redirect(url_for("department"))
             else:
-                pw_hash = sha256(request.form["password"].encode("utf-8")).hexdigest()
-                user = Worker.get(
-                    (Worker.email == request.form["email"])
-                    & (Worker.password == pw_hash)
+                # add pseudo operation to avoid timing attacks
+                bcrypt.checkpw(
+                    request.form["password"].encode(),
+                    "$2b$12$L9jjpO8UOMTUiBSw3ptx2OiFf762t9IUfO/5s3HQzH.NpA9bUdFZ.".encode(),
                 )
-        except Worker.DoesNotExist:
-            status = 403
-            flash("Wrong user or password")
-        else:
-            auth_user(user)
-            return redirect(url_for("homepage"))
+
+                status = 403
+                flash("Wrong user or password")
+
     return render_template("login.html"), status
 
 
@@ -450,9 +455,7 @@ def worker(worker_id):
 
             if request.form.get("password"):
                 if request.form.get("email"):
-                    update[Worker.password] = sha256(
-                        request.form["password"].encode("utf-8")
-                    ).hexdigest()
+                    update[Worker.password] = bcryptify(request.form["password"])
                     flash("Added as user")
                 else:
                     flash("If setting a password a email address is required, too")
