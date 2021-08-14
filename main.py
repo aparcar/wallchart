@@ -188,6 +188,11 @@ def admin():
 @app.route("/structure_test/<int:structure_test_id>", methods=["GET", "POST"])
 def structure_test(structure_test_id=None):
     if request.method == "POST":
+        data = dict(
+            name=request.form["name"].strip(),
+            description=request.form["description"].strip(),
+            active=bool(request.form.get("active")),
+        )
         if structure_test_id:
             action = request.args.get("action")
             if action == "delete":
@@ -199,16 +204,12 @@ def structure_test(structure_test_id=None):
                 ).execute()
                 flash("Deleted Structure Test")
             elif action == "create":
-                StructureTest.update(
-                    name=request.form["name"],
-                    description=request.form["description"],
-                    active=bool(request.form.get("active")),
-                ).where(StructureTest.id == structure_test_id).execute()
+                StructureTest.update(data).where(
+                    StructureTest.id == structure_test_id
+                ).execute()
                 flash("Structure test updated")
         else:
-            structure_test, created = StructureTest.get_or_create(
-                name=request.form["name"], description=request.form["description"]
-            )
+            structure_test, created = StructureTest.get_or_create(data)
             if created:
                 flash(f'Added Structure Test "{ structure_test.name }"')
             else:
@@ -359,7 +360,7 @@ def department(department_slug=None):
     if request.method == "POST":
         # only admins can switch department alias
         if is_admin():
-            Department.update(alias=request.form["alias"]).where(
+            Department.update(alias=request.form["alias"].strip()).where(
                 Department.slug == department_slug
             ).execute()
         flash("Department updated")
@@ -462,28 +463,28 @@ def structure_tests():
 def worker(worker_id):
     if request.method == "POST":
 
-        update = {
-            Worker.preferred_name: request.form["preferred_name"],
-            Worker.pronouns: request.form["pronouns"],
-            Worker.email: request.form["email"] or None,
-            Worker.phone: request.form["phone"] or None,
-            Worker.notes: request.form["notes"],
+        data = {
+            Worker.preferred_name: request.form["preferred_name"].strip(),
+            Worker.pronouns: request.form["pronouns"].strip(),
+            Worker.email: request.form["email"].strip() or None,
+            Worker.phone: request.form["phone"].strip() or None,
+            Worker.notes: request.form["notes"].strip(),
             Worker.active: bool(request.form.get("active")),
         }
 
         # only admins can switch worker departments
         if is_admin():
-            update[Worker.organizing_dept_id] = request.form["organizing_dept"]
+            data[Worker.organizing_dept_id] = request.form["organizing_dept"]
 
             if request.form.get("password"):
                 if request.form.get("email"):
-                    update[Worker.password] = bcryptify(request.form["password"])
-                    update[Worker.dept_chair_id] = request.form["organizing_dept"]
+                    data[Worker.password] = bcryptify(request.form["password"].strip())
+                    data[Worker.dept_chair_id] = request.form["organizing_dept"]
                     flash("Added as user")
                 else:
                     flash("If setting a password a email address is required, too")
 
-        Worker.update(update).where(Worker.id == worker_id).execute()
+        Worker.update(data).where(Worker.id == worker_id).execute()
 
         flash("Worker data updated")
         return redirect(
