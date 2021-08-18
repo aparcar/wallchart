@@ -275,11 +275,19 @@ def login():
 @app.route("/units/")
 @login_required
 def units_view():
+    latest_test = (
+        StructureTest.select(StructureTest.id, StructureTest.name)
+        .order_by(StructureTest.id.desc())
+        .get()
+    )
     units = (
         Unit.select(
             Unit,
             fn.count(Worker.id).alias("worker_count"),
-            fn.count(Participation.id).alias("participation"),
+            fn.sum(Case(Participation.structure_test, ((1, 1),), 0)).alias("members"),
+            fn.sum(Case(Participation.structure_test, ((latest_test.id, 1),), 0)).alias(
+                "latest"
+            ),
         )
         .join(Department, JOIN.LEFT_OUTER, on=(Department.unit == Unit.id))
         .join(Worker, JOIN.LEFT_OUTER, on=(Department.id == Worker.organizing_dept_id))
@@ -291,7 +299,7 @@ def units_view():
         )
         .group_by(Unit.id)
     )
-    return render_template("units.html", units=units)
+    return render_template("units.html", units=units, latest_test_name=latest_test.name)
 
 
 @app.route("/manage-units/", methods=["GET", "POST"])
@@ -321,6 +329,11 @@ def units():
 @app.route("/departments/")
 @login_required
 def departments():
+    latest_test = (
+        StructureTest.select(StructureTest.id, StructureTest.name)
+        .order_by(StructureTest.id.desc())
+        .get()
+    )
     units = (
         Department.select(
             Department,
@@ -328,7 +341,10 @@ def departments():
                 "unit_name"
             ),
             fn.count(Worker.id).alias("worker_count"),
-            fn.count(Participation.id).alias("participation"),
+            fn.sum(Case(Participation.structure_test, ((1, 1),), 0)).alias("members"),
+            fn.sum(Case(Participation.structure_test, ((latest_test.id, 1),), 0)).alias(
+                "latest"
+            ),
         )
         .join(Unit, JOIN.LEFT_OUTER, on=(Department.unit == Unit.id))
         .join(Worker, JOIN.LEFT_OUTER, on=(Department.id == Worker.organizing_dept_id))
@@ -343,6 +359,7 @@ def departments():
     department_count = len(units)
     return render_template(
         "departments.html",
+        latest_test_name=latest_test.name,
         units=units,
         department_count=department_count,
     )

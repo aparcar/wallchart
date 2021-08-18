@@ -4,7 +4,8 @@
 <table class="table table-striped table-hover">
     <tr>
         <th scope="col" class="col-7">Name</th>
-        <th scope="col" class="col-2">Participation</th>
+        <th scope="col" class="col-1">Members</th>
+	<th scope="col" class="col-1">{{ latest_test_name }}</th>
         <th scope="col">Chair(s)</th>
     </tr>
     {% for unit in units %}
@@ -16,10 +17,15 @@
         </td>
         <td>
             {% if unit.worker_count > 0 %}
-            {% set percentage = ( unit.participation / unit.worker_count * 100) | round(2) %}
+            {% set percentage = (unit.members / unit.worker_count * 100) | round(2) %}
             {% endif %}
             <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
-            {{ unit.participation }} ({{ percentage }}%)
+        </td>
+        <td>
+            {% if unit.worker_count > 0 %}
+            {% set percentage = ( unit.latest / unit.worker_count * 100) | round(2) %}
+            {% endif %}
+            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
         </td>
         <td>
 

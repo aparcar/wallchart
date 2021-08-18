@@ -6,7 +6,8 @@
 <table class="table table-striped table-hover">
     <tr>
         <th scope="col" class="col-7">Name</th>
-        <th scope="col" class="col-1">Participation</th>
+        <th scope="col" class="col-1">Members</th>
+	<th scope="col" class="col-1">{{ latest_test_name }}</th>
         <th scope="col">Chair(s)</th>
     </tr>
     {% for department in departments %}
@@ -24,7 +25,13 @@
         </td>
         <td>
             {% if department.worker_count > 0 %}
-            {% set percentage = ( department.participation / department.worker_count * 100) | round(2) %}
+            {% set percentage = ( department.members / department.worker_count * 100) | round(2) %}
+            {% endif %}
+            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
+        </td>
+        <td>
+            {% if department.worker_count > 0 %}
+            {% set percentage = ( department.latest / department.worker_count * 100) | round(2) %}
             {% endif %}
             <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
         </td>
