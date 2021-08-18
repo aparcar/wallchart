@@ -14,9 +14,9 @@
 </div>
 {% if structure_test %}
 <form action="{{ url_for("structure_test", structure_test_id=structure_test.id) }}" method=post>
-    {% else %}
-    <form action="{{ url_for("structure_test") }}" method=post>
-        {% endif %}
+{% else %}
+<form action="{{ url_for("structure_test") }}" method=post>
+{% endif %}
         <p>
             <label for="name">Name</label>
             <input name="name" type="text" value="{{ structure_test.name }}" />

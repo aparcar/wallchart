@@ -189,8 +189,8 @@ def admin():
 def structure_test(structure_test_id=None):
     if request.method == "POST":
         data = dict(
-            name=request.form["name"].strip(),
-            description=request.form["description"].strip(),
+            name=request.form.get("name", "").strip(),
+            description=request.form.get("description", "").strip(),
             active=bool(request.form.get("active")),
         )
         if structure_test_id:
@@ -203,13 +203,13 @@ def structure_test(structure_test_id=None):
                     Participation.structure_test == structure_test_id,
                 ).execute()
                 flash("Deleted Structure Test")
-            elif action == "create":
+            else:
                 StructureTest.update(data).where(
                     StructureTest.id == structure_test_id
                 ).execute()
                 flash("Structure test updated")
         else:
-            structure_test, created = StructureTest.get_or_create(data)
+            structure_test, created = StructureTest.get_or_create(**data)
             if created:
                 flash(f'Added Structure Test "{ structure_test.name }"')
             else:
