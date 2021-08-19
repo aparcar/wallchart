@@ -475,35 +475,47 @@ def structure_tests():
     )
 
 
+@app.route("/worker/", methods=["GET", "POST"])
 @app.route("/worker/<int:worker_id>", methods=["GET", "POST"])
 @login_required
-def worker(worker_id):
+def worker(worker_id=None):
+    worker = None
     if request.method == "POST":
-
-        data = {
-            Worker.preferred_name: request.form["preferred_name"].strip(),
-            Worker.pronouns: request.form["pronouns"].strip(),
-            Worker.email: request.form["email"].strip() or None,
-            Worker.phone: request.form["phone"].strip() or None,
-            Worker.notes: request.form["notes"].strip(),
-            Worker.active: bool(request.form.get("active")),
-        }
-
+        data = dict(
+            preferred_name=request.form.get("preferred_name", "").strip(),
+            pronouns=request.form.get("pronouns", "").strip(),
+            email=request.form.get("email", "").strip() or None,
+            phone=request.form.get("phone", "").strip() or None,
+            notes=request.form.get("notes", "").strip(),
+            active=bool(request.form.get("active")),
+        )
         # only admins can switch worker departments
         if is_admin():
-            data[Worker.organizing_dept_id] = request.form["organizing_dept"]
+            data["organizing_dept_id"] = request.form["organizing_dept"]
 
             if request.form.get("password"):
                 if request.form.get("email"):
-                    data[Worker.password] = bcryptify(request.form["password"].strip())
-                    data[Worker.dept_chair_id] = request.form["organizing_dept"]
+                    data["password"] = bcryptify(request.form["password"].strip())
+                    data["dept_chair_id"] = request.form["organizing_dept"]
                     flash("Added as user")
                 else:
                     flash("If setting a password a email address is required, too")
 
-        Worker.update(data).where(Worker.id == worker_id).execute()
+        if worker_id:
+            Worker.update(**data).where(Worker.id == worker_id).execute()
+            flash("Worker updated")
+        else:
+            worker = Worker.get_or_create(
+                name=request.form.get("Name", "").strip(),
+                contract="manual",
+                # special case for manually added worker
+                department_id=0,
+                **data,
+                updated=date.today(),
+                unit=0
+            )
+            flash("Worker added")
 
-        flash("Worker data updated")
         return redirect(
             url_for(
                 "department",
@@ -513,7 +525,8 @@ def worker(worker_id):
             )
         )
 
-    worker = Worker.get(Worker.id == worker_id)
+    if worker_id:
+        worker = Worker.get(Worker.id == worker_id)
 
     structure_tests = list(
         StructureTest.select(

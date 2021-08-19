@@ -10,7 +10,11 @@
     }
 </script>
 <h2>Update worker data</h2>
-<form action="{{ url_for('worker', worker_id=worker.id) }}" method=post>
+{% if worker %}
+<form action="{{ url_for('worker', worker_id=worker.id) }}" method=post autocomplete="new-password">
+{% else %}
+<form action="{{ url_for("worker") }}" method=post autocomplete="new-password">
+{% endif %}
     <fieldset {{ "disabled" if (session.department_id != worker.organizing_dept_id) and not session.admin }}>
         <h3>
             Worker
@@ -40,7 +44,7 @@
         </p>
         <p>
             <label for="dept">Department</label>
-            <input name="dept" type="text" value="{{ Department.get_by_id(worker.department_id).name }}" disabled />
+            <input name="dept" type="text" value="{{ Department.get_by_id(worker.department_id or 0).name }}" disabled />
         </p>
         {% if session.admin %}
         <p>
