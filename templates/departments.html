@@ -39,7 +39,13 @@
 
 		{% for chair in department.chairs %}
 		{% if not chair.unit_chair_id %}
-		<a href="{{ url_for("worker", worker_id=chair.id) }}">{{ chair.name }}</a>
+		<a href="{{ url_for("worker", worker_id=chair.id) }}">
+		    {%- if chair.preferred_name %}
+		    {{ chair.preferred_name }} ({{ chair.name }})
+		    {% else %}
+		    {{ chair.name }}
+		    {% endif %}
+		</a>
 		{% endif %}
 		{% endfor %}
 	</td>

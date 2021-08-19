@@ -61,7 +61,11 @@
         <tr {% if worker.updated !=last_updated %}class="worker-inactive" {% endif %}>
             <td scope="row">
                 <a href="{{ url_for('worker', worker_id=worker.id) }}">
-                    {{ worker.name }}
+		    {% if worker.preferred_name%}
+		    <b>{{ worker.preferred_name }}</b> ({{ worker.name }})
+		    {% else %}
+		    <b>{{ worker.name }}</b>
+		    {% endif %}
                 </a>
             </td>
             <td>{% if worker.email %}<a href="mailto:{{ worker.email }}">{{ worker.email }}</a>{% else %}Unknown{% endif %}</td>

@@ -21,7 +21,11 @@
         <tr>
             <td scope="row">
                 <a href="{{ url_for('worker', worker_id=user.id) }}">
-                    {{ user.name }}
+		    {%- if user.preferred_name %}
+		    {{ user.preferred_name }} ({{ user.name }})
+		    {% else %}
+		    {{ user.name }}
+		    {% endif %}
                 </a>
             </td>
             <form class="form-inline" action="{{ url_for('users', user_id=user.id) }}" method="post">
