@@ -10,108 +10,140 @@
     }
 </script>
 <h2>Update worker data</h2>
+<h3>
+    Worker
+    {%- if worker.preferred_name %}
+    {{ worker.preferred_name }} ({{ worker.name }})
+    {% else %}
+    {{ worker.name }}
+    {% endif %} (ID: {{ worker.id }})
+</h3>
+<p>Added since {{ worker.added }}, last known contract from {{ worker.updated }}
 {% if worker %}
 <form action="{{ url_for('worker', worker_id=worker.id) }}" method=post autocomplete="new-password">
 {% else %}
 <form action="{{ url_for("worker") }}" method=post autocomplete="new-password">
 {% endif %}
     <fieldset {{ "disabled" if (session.department_id != worker.organizing_dept_id) and not session.admin }}>
-        <h3>
-            Worker
-            {%- if worker.preferred_name %}
-            {{ worker.preferred_name }} ({{ worker.name }})
-            {% else %}
-            {{ worker.name }}
-            {% endif %} (ID: {{ worker.id }})
-        </h3>
-        <p>
-        <p>Added since {{ worker.added }}, last known contract from {{ worker.updated }}
-        <p>
-	{% if not worker %}
+        {% if not worker %}
         <div class="row mb-3">
-            <label for="name" class="col-sm-2 col-form-label">Real Name</label>
-            <div class="col-auto">
-		<input name="name" class="form-control" type="text" value=""" }}" placeholder="Surname,Name" required />
+            <label for="name" class="col-md-2 col-form-label">Real Name</label>
+            <div class="col-md-10">
+                <input name="name" class="form-control" type="text" value="" placeholder="Surname,Name" required />
             </div>
         </div>
-        <p>
-        </p>
-	{% endif %}
-        <p>
-            <label for="preferred_name">Preferred name</label>
-            <input name="preferred_name" type="text" value="{{ worker.preferred_name or "" }}" placeholder="{{ worker.name }}" />
-        </p>
-        <p>
-            <label for="pronouns">Pronouns</label>
-            <input name="pronouns" type="text" value="{{ worker.pronouns or ""}}" placeholder="gender is a spectrum" />
-        </p>
-        <label for="email">E-Mail</label>
-        <input name="email" type="email" value="{{ worker.email or "" }}" placeholder="worker@email.com" />
-        </p>
-        <p>
-            <label for="phone">Phone (only numbers)</label>
-            <input name="phone" type="text" value="{{ worker.phone or ""}}" placeholder="18081234567" />
-        </p>
-        <p>
-            <label for="dept">Department</label>
-            <input name="dept" type="text" value="{{ Department.get_by_id(worker.department_id or 0).name }}" disabled />
-        </p>
-        {% if session.admin %}
-        <p>
-            <label for="organizing_dept">Organizing department</label>
-            <select name="organizing_dept">
-                {% for department in Department.select().order_by(Department.name) %}
-                <option value="{{ department.id }}" {%- if worker.organizing_dept_id == department.id %} selected="selected" {% endif %}>
-                    {{ department.name }}
-                </option>
-                {% endfor %}
-            </select>
-        </p>
+        {% endif %}
+
         <div class="row mb-3">
-            <label for="password" class="col-sm-2 col-form-label">Password</label>
-            <div class="col-auto">
+            <label for="preferred_name" class="col-md-2 col-form-label">Preferred Name</label>
+            <div class="col-md-10">
+                <input preferred_name="preferred_name" class="form-control" type="text" value="{{ worker.preferred_name }}" placeholder="{{ worker.name }}" />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="pronouns" class="col-md-2 col-form-label">Pronouns</label>
+            <div class="col-md-10">
+                <input pronouns="pronouns" class="form-control" type="text" value="{{ worker.pronouns }}" placeholder="gender is a spectrum" />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="email" class="col-md-2 col-form-label">E-Mail</label>
+            <div class="col-md-10">
+                <input email="email" class="form-control" type="text" value="{{ worker.email }}" placeholder="worker@private.email" />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="phone" class="col-md-2 col-form-label">Phone</label>
+            <div class="col-md-10">
+                <input name="phone" class="form-control" type="tel" value="{{ worker.phone or ""}}" placeholder="808-123-4567" />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="dept" class="col-md-2 col-form-label">Department</label>
+            <div class="col-md-10">
+                <input name="dept" type="text" class="form-control" value="{{ Department.get_by_id(worker.department_id or 0).name }}" disabled />
+            </div>
+        </div>
+        {% if session.admin %}
+        <div class="row mb-3">
+            <label for="organizing_dept" class="col-md-2 col-form-label">Organizing department</label>
+            <div class="col-md-10">
+                <select name="organizing_dept" class="form-select">
+                    {% for department in Department.select().order_by(Department.name) %}
+                    <option value="{{ department.id }}" {%- if worker.organizing_dept_id == department.id %} selected="selected" {% endif %}>
+                        {% if department.alias %}
+                        {{ department.alias }} ({{ department.name }})
+                        {% else %}
+                        {{ department.name }}
+                        {% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="password" class="col-md-2 col-form-label">Password</label>
+            <div class="col-md-10">
                 <input type="password" class="form-control" id="password" name="password">
                 <div id="passwordHelp" class="form-text">If a password is added the worker can login.</div>
             </div>
         </div>
         {% endif %}
-        {% if (session.department_id == worker.organizing_dept_id) or session.admin %}
-        <p>
-            <label for="notes">Notes</label>
-            <textarea name="notes">{{ worker.notes or "" }}</textarea>
-        </p>
-        {% endif %}
-        <p>
-            <label for="active">Active (uncheck if worker graduated or is otherwise not currently associated with the university)</label>
-            <input name="active" type="checkbox" value=True {{ "checked" if worker.active }}>
-        </p>
-        <input type="submit" value="Update data" />
 
+        {% if (session.department_id == worker.organizing_dept_id) or session.admin %}
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <div class="form-floating">
+                    <textarea name="notes" style="height: 100px" class="form-control" placeholder="e.g. last contact" id="notes">{{ worker.notes or "" }}</textarea>
+                    <label for="notes">Notes</label>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" name="active" id="active" {{ "checked" if worker.active }}>
+                    <label class="form-check-label" for="active">Active (uncheck if worker graduated or is otherwise not currently associated with the university)</label>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <input type="submit" class="btn btn-primary" value="{{ "Update" if worker else "Add" }}" />
+            </div>
+        </div>
     </fieldset>
 </form>
 
-<h2>Structure Tests</h2>
-<table class="table table-striped table-hover">
-    <form>
-        <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Description</th>
-                <th scope="col">Participation</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for structure_test in structure_tests %}
-            <tr>
-                <td scope="row">{{ structure_test.name }}</td>
-                <td scope="row">{{ structure_test.description }}</td>
-                <td>
-                    <input type="checkbox" data-worker="{{ worker.id }}" data-structure_test="{{ structure_test.id }}" name="{{ structure_test.name }}" onchange="toggleParticipation(this);" {{ "checked" if structure_test.added }} {{ "disabled" if (session.department_id != worker.organizing_dept_id) and not session.admin }}>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </form>
-</table>
+    <h2>Structure Tests</h2>
+    <table class="table table-striped table-hover">
+        <form>
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Participation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for structure_test in structure_tests %}
+                <tr>
+                    <td scope="row">{{ structure_test.name }}</td>
+                    <td scope="row">{{ structure_test.description }}</td>
+                    <td>
+                        <input type="checkbox" data-worker="{{ worker.id }}" data-structure_test="{{ structure_test.id }}" name="{{ structure_test.name }}" onchange="toggleParticipation(this);" {{ "checked" if structure_test.added }} {{ "disabled" if (session.department_id != worker.organizing_dept_id) and not session.admin }}>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </form>
+    </table>
 
-{% endblock %}
+    {% endblock %}
