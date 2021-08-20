@@ -506,7 +506,7 @@ def worker(worker_id=None):
             flash("Worker updated")
         else:
             worker = Worker.get_or_create(
-                name=request.form.get("Name", "").strip(),
+                name=request.form.get("name", "").strip(),
                 contract="manual",
                 # special case for manually added worker
                 department_id=0,

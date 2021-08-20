@@ -27,6 +27,16 @@
         <p>
         <p>Added since {{ worker.added }}, last known contract from {{ worker.updated }}
         <p>
+	{% if not worker %}
+        <div class="row mb-3">
+            <label for="name" class="col-sm-2 col-form-label">Real Name</label>
+            <div class="col-auto">
+		<input name="name" class="form-control" type="text" value=""" }}" placeholder="Surname,Name" required />
+            </div>
+        </div>
+        <p>
+        </p>
+	{% endif %}
         <p>
             <label for="preferred_name">Preferred name</label>
             <input name="preferred_name" type="text" value="{{ worker.preferred_name or "" }}" placeholder="{{ worker.name }}" />
