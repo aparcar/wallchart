@@ -37,21 +37,21 @@
         <div class="row mb-3">
             <label for="preferred_name" class="col-md-2 col-form-label">Preferred Name</label>
             <div class="col-md-10">
-                <input preferred_name="preferred_name" class="form-control" type="text" value="{{ worker.preferred_name or "" }}" placeholder="{{ worker.name }}" />
+                <input name="preferred_name" class="form-control" type="text" value="{{ worker.preferred_name or "" }}" placeholder="{{ worker.name }}" />
             </div>
         </div>
 
         <div class="row mb-3">
             <label for="pronouns" class="col-md-2 col-form-label">Pronouns</label>
             <div class="col-md-10">
-                <input pronouns="pronouns" class="form-control" type="text" value="{{ worker.pronouns or "" }}" placeholder="gender is a spectrum" />
+                <input name="pronouns" class="form-control" type="text" value="{{ worker.pronouns or "" }}" placeholder="gender is a spectrum" />
             </div>
         </div>
 
         <div class="row mb-3">
             <label for="email" class="col-md-2 col-form-label">E-Mail</label>
             <div class="col-md-10">
-                <input email="email" class="form-control" type="text" value="{{ worker.email or "" }}" placeholder="worker@private.email" />
+                <input name="email" class="form-control" type="text" value="{{ worker.email or "" }}" placeholder="worker@private.email" />
             </div>
         </div>
 
