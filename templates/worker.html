@@ -109,8 +109,18 @@
         <div class="row mb-3">
             <div class="col-md-12">
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" name="active" id="active" {{ "checked" if worker.active }}>
-                    <label class="form-check-label" for="active">Active (uncheck if worker graduated or is otherwise not currently associated with the university)</label>
+                    <input class="form-check-input"
+		    	type="checkbox"
+			value="True"
+			name="active"
+			id="active"
+			{{ "checked" if worker.active }}>
+                    <label class="form-check-label"
+			    for="active">
+			Active (uncheck if worker graduated or is
+			otherwise not currently associated with the
+			university)
+		    </label>
                 </div>
             </div>
         </div>
