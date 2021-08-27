@@ -1,3 +1,4 @@
+from datetime import date
 from peewee import (
     JOIN,
     BooleanField,
@@ -11,6 +12,8 @@ from peewee import (
     TextField,
     fn,
 )
+
+from wallchart.app import database
 
 class BaseModel(Model):
     class Meta:
@@ -68,8 +71,4 @@ class Participation(BaseModel):
     class Meta:
         indexes = ((("worker", "structure_test"), True),)
 
-
-def create_tables():
-    with database:
-        database.create_tables([Unit, Department, Worker, StructureTest, Participation])
 
