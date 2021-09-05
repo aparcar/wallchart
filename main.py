@@ -5,6 +5,7 @@ import logging
 from datetime import date
 from functools import wraps
 from pathlib import Path
+import yaml
 
 import bcrypt
 from flask import (
@@ -80,10 +81,10 @@ class Worker(BaseModel):
     email = CharField(unique=True, null=True)
     phone = IntegerField(unique=True, null=True)
     notes = TextField(null=True)
-    contract = CharField()
-    unit = CharField()
-    department_id = IntegerField()
-    organizing_dept_id = IntegerField()
+    contract = CharField(null=True)
+    unit = CharField(null=True)
+    department_id = IntegerField(null=True)
+    organizing_dept_id = IntegerField(null=True)
     unit_chair_id = ForeignKeyField(Unit, field=Unit.id, backref="chairs", null=True)
     dept_chair_id = ForeignKeyField(
         Department, field=Department.id, backref="chairs", null=True
@@ -94,7 +95,7 @@ class Worker(BaseModel):
     password = CharField(null=True)
 
     class Meta:
-        indexes = ((("name", "unit", "department_id", "contract"), True),)
+        indexes = ((("name"), True),)
 
 
 class StructureTest(BaseModel):
@@ -512,7 +513,7 @@ def worker(worker_id=None):
                 department_id=0,
                 **data,
                 updated=date.today(),
-                unit=0
+                unit=0,
             )
             flash("Worker added")
 
@@ -628,39 +629,77 @@ def upload_record():
 
         if record:
             parse_csv(record)
-            new_workers = (
-                Worker.select(Worker, Department)
-                .join(Department, on=(Worker.department_id == Department.id))
-                .where(Worker.updated == date.today())
-            )
-            flash(f"Found {len(new_workers)} new workers")
 
-    return render_template("upload_record.html", new_workers=new_workers)
+    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
+
+    new_workers = (
+        Worker.select(Worker, Department.name.alias("department_name"))
+        .join(Department, on=(Worker.department_id == Department.id))
+        .where((Worker.added == last_updated) & (Worker.department_id != 0))
+    ).dicts()
+
+    former_workers = (
+        Worker.select(Worker, Department.name.alias("department_name"))
+        .join(Department, on=(Worker.department_id == Department.id))
+        .where((Worker.updated != last_updated) & (Worker.department_id != 0))
+    ).dicts()
+
+    flash(f"Found {len(new_workers)} new workers")
+
+    return render_template(
+        "upload_record.html",
+        new_workers=new_workers,
+        former_workers=former_workers,
+    )
 
 
 def parse_csv(csv_file_b):
+    mapping = {}
+    with open("mapping.yml") as mapping_file:
+        mapping = yaml.safe_load(mapping_file)
+
     with io.TextIOWrapper(csv_file_b, encoding="utf-8") as csv_file:
         reader = csv.DictReader(csv_file, delimiter=";")
 
         for row in reader:
+            department_name = mapping["mapping"].get(row["Sect Desc"], row["Sect Desc"])
             department, _ = Department.get_or_create(
-                name=row["Job Sect Desc"].title(),
-                slug=slugify(row["Job Sect Desc"]),
+                # name=row["Job Sect Desc"].title(),
+                # slug=slugify(row["Job Sect Desc"]),
+                name=department_name.title(),
+                slug=slugify(department_name),
             )
 
-            worker, created = Worker.get_or_create(
-                name=row["Name"],
-                contract=row["Job Code"],
-                department_id=department.id,
-                # default organizing_dept to department ID, can be changed later on
-                organizing_dept_id=department.id,
-                unit=row["Unit"],
+            worker_name = f"{row['Last']},{row['First Name']}"
+            if row["Middle"]:
+                worker_name += f" {row['Middle']}"
+
+            worker = Worker.get_or_none(
+                name=worker_name,
             )
-            worker.update(updated=date.today())
+
+            if not worker:
+                worker = Worker.create(
+                    # name=row["Name"],
+                    name=worker_name,
+                    department_id=department.id,
+                    organizing_dept_id=department.id,
+                    # default organizing_dept to department ID, can be changed later on
+                    # unit=row["Unit"],
+                )
+
+            worker.update(
+                updated=date.today(),
+                contract=row["Job Code"],
+                unit=row["Campus"],
+                department_id=department.id,
+            ).where(
+                Worker.id == worker.id,
+            ).execute()
 
 
 if __name__ == "__main__":
     if not Path(DATABASE).exists():
         create_tables()
 
-    app.run()
+    app.run(port=5001)
