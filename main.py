@@ -281,6 +281,8 @@ def units_view():
         .order_by(StructureTest.id.desc())
         .get()
     )
+
+    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
     units = (
         Unit.select(
             Unit,
@@ -298,6 +300,7 @@ def units_view():
             JOIN.LEFT_OUTER,
             on=(Participation.structure_test == StructureTest.id),
         )
+        .where(Worker.updated == last_updated)
         .group_by(Unit.id)
     )
     return render_template("units.html", units=units, latest_test_name=latest_test.name)
@@ -335,6 +338,9 @@ def departments():
         .order_by(StructureTest.id.desc())
         .get()
     )
+
+    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
+
     units = (
         Department.select(
             Department,
@@ -355,6 +361,7 @@ def departments():
             JOIN.LEFT_OUTER,
             on=(Participation.structure_test == StructureTest.id),
         )
+        .where(Worker.updated == last_updated)
         .group_by(Department.id)
     )
     department_count = len(units)
@@ -384,6 +391,8 @@ def department(department_slug=None):
     else:
         department = Department.get(Department.id == session["department_id"])
 
+    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
+
     workers = (
         Worker.select(
             Worker,
@@ -395,14 +404,16 @@ def department(department_slug=None):
         )
         .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
         .where(
-            (Worker.organizing_dept_id == department.id)
-            | (Worker.department_id == department.id)
+            (
+                (Worker.organizing_dept_id == department.id)
+                | (Worker.department_id == department.id)
+            )
+            & (Worker.updated == last_updated)
         )
         .group_by(Worker.id)
         .order_by(Worker.updated.desc(), Worker.name, Participation.structure_test)
     )
 
-    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
     units = Unit.select().order_by(Unit.name)
 
     structure_tests = StructureTest.select().order_by(StructureTest.added)
