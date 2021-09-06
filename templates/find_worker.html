@@ -87,7 +87,7 @@
 		  <tr>
 		  <td scope="row">
 			<a href="/worker/${item.id}">
-			${item.preferred_name != undefined ? item.preferred_name + " (" + item.name + ")" : item.name }
+			${item.preferred_name ? item.preferred_name + " (" + item.name + ")" : item.name }
 			</a></td>
 			<td scope="row">
 			<a href="/department/${item.department_slug}">${item.department_name}</a></td>
