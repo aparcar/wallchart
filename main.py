@@ -5,9 +5,10 @@ import logging
 from datetime import date
 from functools import wraps
 from pathlib import Path
-import yaml
 
 import bcrypt
+import phonenumbers
+import yaml
 from flask import (
     Flask,
     flash,
@@ -498,10 +499,20 @@ def worker(worker_id=None):
             preferred_name=request.form.get("preferred_name", "").strip(),
             pronouns=request.form.get("pronouns", "").strip(),
             email=request.form.get("email", "").strip() or None,
-            phone=request.form.get("phone", "").strip() or None,
             notes=request.form.get("notes", "").strip(),
             active=bool(request.form.get("active")),
         )
+
+        phone = request.form.get("phone")
+        try:
+            if phone:
+                data["phone"] = phonenumbers.format_number(
+                    phonenumbers.parse(phone, "US"),
+                    phonenumbers.PhoneNumberFormat.NATIONAL,
+                )
+        except:
+            flash(f"Phone number '{phone}' is not a correct phone number", "danger")
+
         # only admins can switch worker departments
         if is_admin():
             data["organizing_dept_id"] = request.form["organizing_dept"]
