@@ -370,18 +370,19 @@ def departments():
 @app.route("/department/<path:department_slug>", methods=["GET", "POST"])
 @login_required
 def department(department_slug=None):
+    if request.method == "POST":
+        # only admins can switch department alias
+        if is_admin():
+            Department.update(
+                alias=request.form["alias"].strip() or None,
+                unit=request.form["unit"] or None,
+            ).where(Department.slug == department_slug).execute()
+        flash("Department updated")
+
     if department_slug:
         department = Department.get(Department.slug == department_slug)
     else:
         department = Department.get(Department.id == session["department_id"])
-
-    if request.method == "POST":
-        # only admins can switch department alias
-        if is_admin():
-            Department.update(alias=request.form["alias"].strip()).where(
-                Department.slug == department_slug
-            ).execute()
-        flash("Department updated")
 
     workers = (
         Worker.select(
@@ -578,15 +579,6 @@ def users():
     return render_template(
         "users.html", users=users, units=units, departments=departments
     )
-
-
-@app.route("/set-department-unit/<int:unit_id>/<int:department_id>")
-def set_department_unit(unit_id, department_id):
-    if session.get("department_id") != 0:
-        return "", 400
-
-    Department.update(unit=unit_id).where(Department.id == department_id).execute()
-    return ""
 
 
 @app.route("/participation/<int:worker_id>/<int:structure_test_id>/<int:status>")
