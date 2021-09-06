@@ -548,11 +548,14 @@ def worker(worker_id=None):
         .dicts()
     )
 
+    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
+
     return render_template(
         "worker.html",
         worker=worker,
         structure_tests=structure_tests,
         Department=Department,
+        last_updated=last_updated,
     )
 
 

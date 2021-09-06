@@ -9,16 +9,19 @@
             .then(response => console.log(response));
     }
 </script>
-<h2>Update worker data</h2>
-<h3>
-    Worker
+<h2>
     {%- if worker.preferred_name %}
     {{ worker.preferred_name }} ({{ worker.name }})
     {% else %}
     {{ worker.name }}
-    {% endif %} (ID: {{ worker.id }})
-</h3>
-<p>Added since {{ worker.added }}, last known contract from {{ worker.updated }}
+    {% endif %}
+</h2>
+<p>
+{% if worker.updated != last_updated %}
+    <span class="badge bg-danger">No longer hired</span>
+{% endif %}
+    Added {{ worker.added }}, last contract {{ worker.updated }}
+</p>
 {% if worker %}
 <form action="{{ url_for('worker', worker_id=worker.id) }}" method=post autocomplete="new-password">
 {% else %}
