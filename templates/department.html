@@ -50,13 +50,6 @@
                 (element.checked ? 1 : 0))
             .then(response => console.log(response));
     }
-
-    function setDepartmentUnit(element) {
-        console.log(element)
-        fetch("/set-department-unit/" + element.value + "/{{ department.id }}")
-            .then(response => console.log(response));
-
-    }
 </script>
 <h3>Organized Workers in this department</h3>
 <table class="table table-striped table-hover">

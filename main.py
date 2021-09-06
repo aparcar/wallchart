@@ -592,6 +592,20 @@ def users():
     )
 
 
+@app.route("/former/")
+@login_required
+def former():
+    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
+    former = list(
+        Worker.select(Worker, Department.name.alias("department_name"))
+        .join(Department, on=(Worker.organizing_dept_id == Department.id))
+        .where(Worker.updated != last_updated)
+        .order_by(Worker.name)
+        .dicts()
+    )
+    return render_template("former.html", former=former)
+
+
 @app.route("/participation/<int:worker_id>/<int:structure_test_id>/<int:status>")
 def participation(worker_id, structure_test_id, status):
     worker = Worker.get(Worker.id == worker_id)
