@@ -9,20 +9,24 @@
     ({{ worker_count }})
 </h2>
 {% if session.admin %}
-<label for="unit">Unit:</label>
-<select name="unit" onchange="setDepartmentUnit(this);">
+<div class="form-floating mb-2">
+  <select class="form-select" id="unit" aria-label="Unit" onchange="setDepartmentUnit(this);">
     <option value="">None</option>
     {%- for unit in units %}
     <option value="{{ unit.id }}" {% if department.unit.id == unit.id %}selected="selected" {% endif %}>
         {{- unit.name -}}
     </option>
     {%- endfor %}
-</select>
+  </select>
+  <label for="unit">Unit of this department</label>
+</div>
+
 <form action="{{ url_for('department', department_slug=department.slug) }}" method=post>
     <label for="alias">Alias </label>
     <input name="alias" type="text" value="{{  department.alias }}" />
     <input type="submit" value="Set alias" />
 </form>
+
 {% endif %}
 <p>
     Chair: {{ department.chair | join(', ', attribute="email") or "None" }}
