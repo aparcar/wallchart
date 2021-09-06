@@ -177,12 +177,18 @@ def download_db():
 
 @app.route("/admin")
 def admin():
+    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
     department_count = Department.select(fn.count(Department.id)).scalar()
     worker_count = (
-        Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
+        Worker.select(fn.count(Worker.id))
+        .where(Worker.updated == last_updated)
+        .scalar()
     )
     return render_template(
-        "admin.html", department_count=department_count, worker_count=worker_count
+        "admin.html",
+        last_updated=last_updated,
+        department_count=department_count,
+        worker_count=worker_count,
     )
 
 
