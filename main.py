@@ -398,7 +398,7 @@ def department(department_slug=None):
             | (Worker.department_id == department.id)
         )
         .group_by(Worker.id)
-        .order_by(Worker.name, Participation.structure_test)
+        .order_by(Worker.updated.desc(), Worker.name, Participation.structure_test)
     )
 
     last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
