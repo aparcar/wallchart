@@ -181,7 +181,7 @@ def admin():
     department_count = Department.select(fn.count(Department.id)).scalar()
     worker_count = (
         Worker.select(fn.count(Worker.id))
-        .where(Worker.updated == last_updated)
+        .where(Worker.active == True)
         .scalar()
     )
     return render_template(
@@ -289,7 +289,6 @@ def units_view():
         .get()
     )
 
-    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
     units = (
         Unit.select(
             Unit,
@@ -307,7 +306,7 @@ def units_view():
             JOIN.LEFT_OUTER,
             on=(Participation.structure_test == StructureTest.id),
         )
-        .where(Worker.updated == last_updated)
+        .where(Worker.active == True)
         .group_by(Unit.id)
     )
     return render_template("units.html", units=units, latest_test_name=latest_test.name)
@@ -368,7 +367,7 @@ def departments():
             JOIN.LEFT_OUTER,
             on=(Participation.structure_test == StructureTest.id),
         )
-        .where(Worker.updated == last_updated)
+        .where(Worker.active == True)
         .group_by(Department.id)
     )
     department_count = len(units)
@@ -415,7 +414,7 @@ def department(department_slug=None):
                 (Worker.organizing_dept_id == department.id)
                 | (Worker.department_id == department.id)
             )
-            & (Worker.updated == last_updated)
+            & (Worker.active == True)
         )
         .group_by(Worker.id)
         .order_by(Worker.updated.desc(), Worker.name, Participation.structure_test)
@@ -616,7 +615,7 @@ def former():
     former = list(
         Worker.select(Worker, Department.name.alias("department_name"))
         .join(Department, on=(Worker.organizing_dept_id == Department.id))
-        .where(Worker.updated != last_updated)
+        .where(Worker.active != True)
         .order_by(Worker.name)
         .dicts()
     )
@@ -675,18 +674,11 @@ def upload_record():
         .where((Worker.added == last_updated) & (Worker.department_id != 0))
     ).dicts()
 
-    former_workers = (
-        Worker.select(Worker, Department.name.alias("department_name"))
-        .join(Department, on=(Worker.department_id == Department.id))
-        .where((Worker.updated != last_updated) & (Worker.department_id != 0))
-    ).dicts()
-
     flash(f"Found {len(new_workers)} new workers")
 
     return render_template(
         "upload_record.html",
         new_workers=new_workers,
-        former_workers=former_workers,
     )
 
 
