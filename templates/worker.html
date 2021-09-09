@@ -19,6 +19,8 @@
 <p>
 {% if worker.updated != last_updated %}
     <span class="badge bg-danger">Not updated in last record</span>
+{% else %}
+    <span class="badge bg-success">Updated in last record</span>
 {% endif %}
     Added {{ worker.added }}, last contract {{ worker.updated }}
 </p>
@@ -67,12 +69,12 @@
 
         <div class="row mb-3">
             <label for="dept" class="col-md-2 col-form-label">Department</label>
-            <div class="col-md-9">
+            <div class="col-9">
                 <input name="dept" type="text" class="form-control" value="{{ Department.get_by_id(worker.department_id or 0).name }}" disabled />
             </div>
-            <div class="col-md-1">
-              <a href="{{ worker.department_slug }}">
-                <button type="submit" class="btn btn-sm">
+            <div class="col-1">
+              <a href="/department/{{ Department.get_by_id(worker.department_id or 0).slug }}">
+                <button type="button" class="btn btn-sm">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
                   </svg>
@@ -83,7 +85,7 @@
         {% if session.admin %}
         <div class="row mb-3">
             <label for="organizing_dept" class="col-md-2 col-form-label">Organizing department</label>
-            <div class="col-md-10">
+            <div class="col-9">
                 <select name="organizing_dept" class="form-select">
                     {% for department in Department.select().order_by(Department.name) %}
                     <option value="{{ department.id }}" {%- if worker.organizing_dept_id == department.id %} selected="selected" {% endif %}>
@@ -95,6 +97,15 @@
                     </option>
                     {% endfor %}
                 </select>
+            </div>
+            <div class="col-1">
+              <a href="/department/{{ Department.get_by_id(worker.organizing_dept_id or 0).slug }}">
+                <button type="button" class="btn btn-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                  </svg>
+                </button>
+              </a>
             </div>
         </div>
 
