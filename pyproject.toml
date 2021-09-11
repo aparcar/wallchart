@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "wallchart"
+version = "0.1.0"
+description = ""
+authors = ["Paul Spooren <mail@aparcar.org>", "Jack Runburg <jack.runburg@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+Flask = "^2.0.1"
+phonenumbers = "^8.12.31"
+peewee = "^3.14.4"
+python-slugify = "^5.0.2"
+bcrypt = "^3.2.0"
+PyYAML = "^5.4.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+coverage = "^5.5"
+black = "^21.8b0"
+pylint = "^2.10.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
