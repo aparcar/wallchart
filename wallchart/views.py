@@ -88,7 +88,7 @@ def admin():
     last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
     department_count = Department.select(fn.count(Department.id)).scalar()
     worker_count = (
-        Worker.select(fn.count(Worker.id)).where(Worker.active is True).scalar()
+        Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
     )
     return render_template(
         "admin.html",
@@ -171,7 +171,7 @@ def units_view():
             JOIN.LEFT_OUTER,
             on=(Participation.structure_test == StructureTest.id),
         )
-        .where(Worker.active is True)
+        .where(Worker.active == True)
         .group_by(Unit.id)
     )
     return render_template("units.html", units=units, latest_test_name=latest_test.name)
@@ -230,7 +230,7 @@ def departments():
             JOIN.LEFT_OUTER,
             on=(Participation.structure_test == StructureTest.id),
         )
-        .where(Worker.active is True)
+        .where(Worker.active == True)
         .group_by(Department.id)
     )
     department_count = len(units)
@@ -277,7 +277,7 @@ def department(department_slug=None):
                 (Worker.organizing_dept_id == department.id)
                 | (Worker.department_id == department.id)
             )
-            & (Worker.active is True)
+            & (Worker.active == True)
         )
         .group_by(Worker.id)
         .order_by(Worker.updated.desc(), Worker.name, Participation.structure_test)
@@ -314,7 +314,7 @@ def structure_tests():
         .order_by(StructureTest.added)
     )
     worker_count = (
-        Worker.select(fn.count(Worker.id)).where(Worker.active is True).scalar()
+        Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
     )
     return render_template(
         "structure_tests.html",
@@ -443,7 +443,7 @@ def former():
     former = list(
         Worker.select(Worker, Department.name.alias("department_name"))
         .join(Department, on=(Worker.organizing_dept_id == Department.id))
-        .where(Worker.active is not True)
+        .where(Worker.active != True)
         .order_by(Worker.name)
         .dicts()
     )
