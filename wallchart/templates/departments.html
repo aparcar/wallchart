@@ -27,13 +27,13 @@
             {% if department.worker_count > 0 %}
             {% set percentage = ( department.members / department.worker_count * 100) | round(2) %}
             {% endif %}
-            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
+            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}" title="{{ department.members }}&#x2F;{{department.worker_count}} completed">{{ department.members }} / {{department.worker_count }}</meter>
         </td>
         <td>
             {% if department.worker_count > 0 %}
             {% set percentage = ( department.latest / department.worker_count * 100) | round(2) %}
             {% endif %}
-            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
+            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}" title="{{ department.latest }}&#x2F;{{ department.worker_count }} completed"></meter>
         </td>
         <td>
 
