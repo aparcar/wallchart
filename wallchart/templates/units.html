@@ -19,13 +19,13 @@
             {% if unit.worker_count > 0 %}
             {% set percentage = (unit.members / unit.worker_count * 100) | round(2) %}
             {% endif %}
-            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
+            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}" title="{{ unit.members }}&#x2F;{{ unit.worker_count }} completed"></meter>
         </td>
         <td>
             {% if unit.worker_count > 0 %}
             {% set percentage = ( unit.latest / unit.worker_count * 100) | round(2) %}
             {% endif %}
-            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"></meter>
+            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}" title="{{ unit.latest }}&#x2F;{{ unit.worker_count }}"></meter>
         </td>
         <td>
 
