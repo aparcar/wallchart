@@ -1,10 +1,13 @@
 import os
+import io
 import tempfile
 
 import pytest
 
 import wallchart
 from wallchart.db import create_tables
+
+from datetime import date
 
 
 @pytest.fixture
@@ -38,12 +41,12 @@ def test_empty_db(client):
 
 def login(client, email, password):
     return client.post(
-        "/login", data=dict(email=email, password=password), follow_redirects=True
+        "/login/", data=dict(email=email, password=password), follow_redirects=True
     )
 
 
 def logout(client):
-    return client.get("/logout", follow_redirects=True)
+    return client.get("/logout/", follow_redirects=True)
 
 
 def test_login_logout(app, client):
@@ -63,3 +66,46 @@ def test_login_logout(app, client):
 
     rv = login(client, username, f"{password}x")
     assert rv.status_code == 403
+
+
+def test_upload_record(app, client):
+    """xxx"""
+    rv = login(client, "admin", app.config["ADMIN_PASSWORD"])
+    assert rv.status_code == 200
+
+    data = {}
+    with open("tests/test_roster.csv", 'rb') as roster_file:
+        data["record"] = (roster_file, "roster.csv")
+        rv = client.post("/upload_record", data=data, follow_redirects=True,
+        content_type='multipart/form-data'
+        )
+        print(rv.data)
+        assert rv.status_code == 200
+
+    rv = client.get("/worker/1")
+    assert b"Alison" in rv.data
+        
+
+
+#def test_add_worker(app, client):
+#    """xXx"""
+#    rv = login(client, "admin", app.config["ADMIN_PASSWORD"])
+#    assert rv.status_code == 200
+#
+#    data = dict(
+#        name="Test,Worker",
+#        contract="manual",
+#        department_id=0,
+#        organizing_dept=0,
+#        updated=date.today(),
+#        unit=0,
+#        preferred_name="Worka",
+#        pronouns="he/him",
+#        email="test@worker.com",
+#        notes="These are notes",
+#        active=True,
+#    )
+#
+#    rv = client.post("/worker/", data=data, follow_redirects=True)
+#    print(rv.data)
+#    assert rv.status_code == 200
