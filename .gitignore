@@ -1,6 +1,6 @@
-*.csv
 *.db
 .coverage
+wallchart/*.csv
 .direnv/
 .vscode/
 __pycache__/
