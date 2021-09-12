@@ -83,7 +83,7 @@ def test_upload_record(app, client):
         assert rv.status_code == 200
 
     rv = client.get("/worker/1")
-    assert b"Alison" in rv.data
+    assert b"Space" in rv.data
         
 
 
