@@ -4,7 +4,7 @@ from functools import wraps
 from io import TextIOWrapper
 
 import bcrypt
-import slugify
+from slugify import slugify
 import yaml
 from flask import redirect, session, url_for
 

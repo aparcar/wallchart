@@ -2,7 +2,7 @@ from datetime import date
 
 import bcrypt
 import phonenumbers
-import slugify
+from slugify import slugify
 from flask import (
     Blueprint,
     current_app,
@@ -488,7 +488,7 @@ def upload_record():
             return redirect(request.url)
 
         if not record.filename.lower().endswith(".csv"):
-            flash("Wrong filetye, convert to CSV please")
+            flash("Wrong filetype, convert to CSV please")
             return redirect(request.url)
 
         if record:
