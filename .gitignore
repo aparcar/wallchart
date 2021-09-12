@@ -1,7 +1,10 @@
 *.csv
+*.db
+.coverage
 .direnv/
 .vscode/
 __pycache__/
 config.ini
-wallcharts.db
+coverage.xml
+dist/
 instance/
