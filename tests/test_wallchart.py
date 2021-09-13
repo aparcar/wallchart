@@ -69,22 +69,49 @@ def test_login_logout(app, client):
 
 
 def test_upload_record(app, client):
-    """xxx"""
+    """Test adding a sample roster and parsing"""
     rv = login(client, "admin", app.config["ADMIN_PASSWORD"])
     assert rv.status_code == 200
 
     data = {}
+
+    rv = client.post("/upload_record", data=data, follow_redirects=True, content_type='multipart/form-data')
+    assert b'Missing file' in rv.data
+    assert b'Found 0 new workers' in rv.data
+
+    data["record"] = (b'', "")
+    rv = client.post("/upload_record", data=data, follow_redirects=True, content_type='multipart/form-data')
+    assert b'No selected file' in rv.data
+    assert b'Found 0 new workers' in rv.data
+
+    data["record"] = (b'', "foo")
+    rv = client.post("/upload_record", data=data, follow_redirects=True, content_type='multipart/form-data')
+    assert b'Wrong filetype, convert to CSV please' in rv.data
+    assert b'Found 0 new workers' in rv.data
+
     with open("tests/test_roster.csv", 'rb') as roster_file:
         data["record"] = (roster_file, "roster.csv")
         rv = client.post("/upload_record", data=data, follow_redirects=True,
         content_type='multipart/form-data'
         )
-        print(rv.data)
+
         assert rv.status_code == 200
+        assert b'New workers: 10' in rv.data
+        assert b'Burrito,Frozen Bean' in rv.data
+        assert b'Anthropology Dept' in rv.data
 
     rv = client.get("/worker/1")
-    assert b"Space" in rv.data
-        
+
+    assert b'placeholder="gender is a spectrum"' in rv.data
+    assert b'placeholder="worker@private.email"' in rv.data
+    assert b'placeholder="(808) 123-4567"' in rv.data
+
+    assert b"Station,International Space" in rv.data
+    assert b'<input name="dept" type="text" class="form-control" value="Curriculum Studies" disabled />' in rv.data
+    assert b'id="active"\n\t\t\tchecked>' in rv.data
+
+    rv = client.get("/upload_record")
+    assert b'Found 10 new workers' in rv.data
 
 
 #def test_add_worker(app, client):
