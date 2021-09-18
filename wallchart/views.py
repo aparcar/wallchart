@@ -2,7 +2,6 @@ from datetime import date
 
 import bcrypt
 import phonenumbers
-from slugify import slugify
 from flask import (
     Blueprint,
     current_app,
@@ -15,9 +14,10 @@ from flask import (
     url_for,
 )
 from peewee import JOIN, Case, fn
+from slugify import slugify
 
 from wallchart.db import Department, Participation, StructureTest, Unit, Worker
-from wallchart.util import bcryptify, is_admin, login_required, parse_csv
+from wallchart.util import bcryptify, is_admin, last_updated, login_required, parse_csv
 
 views = Blueprint("", __name__, url_prefix="/")
 
@@ -85,14 +85,13 @@ def download_db():
 
 @views.route("/admin")
 def admin():
-    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
     department_count = Department.select(fn.count(Department.id)).scalar()
     worker_count = (
         Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
     )
     return render_template(
         "admin.html",
-        last_updated=last_updated,
+        last_updated=last_updated(),
         department_count=department_count,
         worker_count=worker_count,
     )
@@ -260,8 +259,6 @@ def department(department_slug=None):
     else:
         department = Department.get(Department.id == session["department_id"])
 
-    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
-
     workers = (
         Worker.select(
             Worker,
@@ -293,7 +290,7 @@ def department(department_slug=None):
         worker_count=len(workers),
         department=department,
         structure_tests=structure_tests,
-        last_updated=last_updated,
+        last_updated=last_updated(),
         units=units,
     )
 
@@ -405,14 +402,12 @@ def worker(worker_id=None):
         .dicts()
     )
 
-    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
-
     return render_template(
         "worker.html",
         worker=worker,
         structure_tests=structure_tests,
         Department=Department,
-        last_updated=last_updated,
+        last_updated=last_updated(),
     )
 
 
@@ -494,12 +489,10 @@ def upload_record():
         if record:
             parse_csv(record)
 
-    last_updated = Worker.select(fn.MAX(Worker.updated)).scalar()
-
     new_workers = (
         Worker.select(Worker, Department.name.alias("department_name"))
         .join(Department, on=(Worker.department_id == Department.id))
-        .where((Worker.added == last_updated) & (Worker.department_id != 0))
+        .where((Worker.added == last_updated()) & (Worker.department_id != 0))
     ).dicts()
 
     flash(f"Found {len(new_workers)} new workers")

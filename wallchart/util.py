@@ -4,11 +4,20 @@ from functools import wraps
 from io import TextIOWrapper
 
 import bcrypt
-from slugify import slugify
 import yaml
 from flask import redirect, session, url_for
+from peewee import fn
+from slugify import slugify
 
 from wallchart.db import Department, Worker
+
+
+def last_updated():
+    return (
+        Worker.select(fn.MAX(Worker.updated))
+        .where(Worker.contract != "manual")
+        .scalar()
+    )
 
 
 def bcryptify(password: str):
