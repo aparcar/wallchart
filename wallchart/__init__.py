@@ -13,6 +13,8 @@ def create_app(config=None):
     app.config.from_object("wallchart.defaults")
     app.config.from_pyfile("config.py", silent=True)
 
+    app.config["DATABASE"] = f"sqlite:///{app.instance_path}/wallcharts.db"
+
     if config is not None:
         if isinstance(config, dict):
             app.config.update(config)
