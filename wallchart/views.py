@@ -495,7 +495,8 @@ def upload_record():
         .where((Worker.added == last_updated()) & (Worker.department_id != 0))
     ).dicts()
 
-    flash(f"Found {len(new_workers)} new workers")
+    if new_workers:
+        flash(f"Found {len(new_workers)} new workers")
 
     return render_template(
         "upload_record.html",

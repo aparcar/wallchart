@@ -82,7 +82,6 @@ def test_upload_record(app, client):
         content_type="multipart/form-data",
     )
     assert b"Missing file" in rv.data
-    assert b"Found 0 new workers" in rv.data
 
     data["record"] = (b"", "")
     rv = client.post(
@@ -92,7 +91,6 @@ def test_upload_record(app, client):
         content_type="multipart/form-data",
     )
     assert b"No selected file" in rv.data
-    assert b"Found 0 new workers" in rv.data
 
     data["record"] = (b"", "foo")
     rv = client.post(
@@ -102,7 +100,6 @@ def test_upload_record(app, client):
         content_type="multipart/form-data",
     )
     assert b"Wrong filetype, convert to CSV please" in rv.data
-    assert b"Found 0 new workers" in rv.data
 
     with open("tests/test_roster.csv", "rb") as roster_file:
         data["record"] = (roster_file, "roster.csv")
