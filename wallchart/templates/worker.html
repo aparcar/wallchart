@@ -22,6 +22,9 @@
 {% else %}
     <span class="badge bg-success">Updated in last record</span>
 {% endif %}
+{% if worker.contract == "manual" %}
+    <span class="badge bg-info">Manually added</span>
+{% endif %}
     Added {{ worker.added }}, last contract {{ worker.updated }}
 </p>
 {% if worker %}
