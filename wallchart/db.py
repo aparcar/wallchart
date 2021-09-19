@@ -1,11 +1,6 @@
 from datetime import date
 
-from wallchart import db_wrapper
-
-
 from flask import Blueprint, current_app
-
-
 from peewee import (
     AutoField,
     BooleanField,
@@ -15,6 +10,8 @@ from peewee import (
     IntegerField,
     TextField,
 )
+
+from wallchart import db_wrapper
 
 db = Blueprint("db", __name__)
 

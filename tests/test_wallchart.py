@@ -1,13 +1,12 @@
-import os
 import io
+import os
 import tempfile
+from datetime import date
 
 import pytest
 
 import wallchart
 from wallchart.db import create_tables
-
-from datetime import date
 
 
 @pytest.fixture

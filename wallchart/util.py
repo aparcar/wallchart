@@ -1,5 +1,5 @@
 import csv
-from datetime import date
+from datetime import date, timedelta
 from functools import wraps
 from io import TextIOWrapper
 
@@ -10,6 +10,10 @@ from peewee import fn
 from slugify import slugify
 
 from wallchart.db import Department, Worker
+
+
+def max_age():
+    return date.today() - timedelta(days=365)
 
 
 def last_updated():
@@ -86,3 +90,5 @@ def parse_csv(csv_file_b):
             ).where(
                 Worker.id == worker.id,
             ).execute()
+
+    Worker.update(active=False).where(Worker.updated != date.today()).execute()

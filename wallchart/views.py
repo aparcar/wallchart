@@ -17,7 +17,14 @@ from peewee import JOIN, Case, fn
 from slugify import slugify
 
 from wallchart.db import Department, Participation, StructureTest, Unit, Worker
-from wallchart.util import bcryptify, is_admin, last_updated, login_required, parse_csv
+from wallchart.util import (
+    bcryptify,
+    is_admin,
+    last_updated,
+    login_required,
+    max_age,
+    parse_csv,
+)
 
 views = Blueprint("", __name__, url_prefix="/")
 
@@ -87,7 +94,7 @@ def download_db():
 def admin():
     department_count = Department.select(fn.count(Department.id)).scalar()
     worker_count = (
-        Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
+        Worker.select(fn.count(Worker.id)).where(Worker.updated > max_age()).scalar()
     )
     return render_template(
         "admin.html",
@@ -274,10 +281,10 @@ def department(department_slug=None):
                 (Worker.organizing_dept_id == department.id)
                 | (Worker.department_id == department.id)
             )
-            & (Worker.active == True)
+            & (Worker.updated > max_age())
         )
         .group_by(Worker.id)
-        .order_by(Worker.updated.desc(), Worker.name, Participation.structure_test)
+        .order_by(Worker.active.desc(), Worker.name, Participation.structure_test)
     )
 
     units = Unit.select().order_by(Unit.name)

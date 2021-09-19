@@ -66,7 +66,7 @@
     <tbody>
         {% for worker in workers %}
         {% if worker.organizing_dept_id == department.id %}
-        <tr {% if worker.updated !=last_updated %}class="table-danger" {% endif %}>
+        <tr {% if worker.active != True %}class="table-danger" {% endif %}>
             <td scope="row">
                 <a href="{{ url_for('worker', worker_id=worker.id) }}">
 		    {% if worker.preferred_name%}
@@ -108,7 +108,7 @@
     <tbody>
         {% for worker in workers %}
         {% if worker.organizing_dept_id != department.id %}
-        <tr {% if worker.updated !=last_updated %}class="worker-inactive" {% endif %}>
+        <tr {% if worker.active != True %}class="table-danger" {% endif %}>
             <td scope="row">
                 <a href="{{ url_for('worker', worker_id=worker.id) }}">
                     {{ worker.name }}
