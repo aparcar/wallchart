@@ -32,6 +32,10 @@ def create_app(config=None):
     except OSError:
         pass
 
+    from wallchart.db import db
+
+    app.register_blueprint(db)
+
     db_wrapper.init_app(app)
 
     from wallchart.views import views
