@@ -2,7 +2,8 @@ from datetime import date
 
 from wallchart import db_wrapper
 
-from flask import Blueprint
+
+from flask import Blueprint, current_app
 
 
 from peewee import (
@@ -74,11 +75,16 @@ class Participation(db_wrapper.Model):
         indexes = ((("worker", "structure_test"), True),)
 
 
-@db.cli.command("create-tables")
 def create_tables():
-    print("Creating database tables...")
     with db_wrapper.database.connection_context():
         db_wrapper.database.create_tables(
             [Unit, Department, Worker, StructureTest, Participation]
         )
+
+
+@db.cli.command("create-tables")
+def cli_create_tables():
+    print("Creating database tables...")
+    with current_app.app_context():
+        create_tables()
     print("Done")
