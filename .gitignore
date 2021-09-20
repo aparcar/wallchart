@@ -1,10 +1,11 @@
 *.db
 .coverage
-wallchart/*.csv
 .direnv/
 .vscode/
 __pycache__/
 config.ini
 coverage.xml
 dist/
+htmlcov/
 instance/
+wallchart/*.csv
