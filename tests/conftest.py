@@ -22,6 +22,7 @@ def app():
         }
     )
     create_tables()
+    load_test_data()
     yield app
     os.close(db_fd)
     os.unlink(db_path)
@@ -48,6 +49,10 @@ def login(client, email, password):
 def load_test_data():
     with open("tests/test_roster.csv", "rb") as roster_file:
         parse_csv(roster_file)
+    db.Worker.update(
+        email="test@test.com",
+        password="$2b$12$bKGBVGgi7AzUXIuljVHE8OxPptMM9TxYKTw7qdNQiBDIAZ.jjXxyu",
+    ).where(db.Worker.id == 1).execute()
     db.close()
 
 

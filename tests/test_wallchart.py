@@ -6,28 +6,37 @@ def test_empty_db(client):
     assert rv.status_code == 302
 
 
-def test_login_logout(app, client):
+def test_login_logout_admin(app, client):
     """Make sure login and logout works."""
 
-    username = "admin"
-    password = app.config["ADMIN_PASSWORD"]
-
-    rv = login(client, username, password)
+    rv = login(client, "admin", app.config["ADMIN_PASSWORD"])
     assert rv.status_code == 200
 
     rv = logout(client)
     assert rv.status_code == 200
 
-    rv = login(client, f"{username}x", password)
+
+def test_login_logout_user(client):
+    rv = login(client, "test@test.com", "test")
+    assert rv.status_code == 200
+
+    rv = logout(client)
+    assert rv.status_code == 200
+
+
+def test_login_logout_bad_user(client):
+    rv = login(client, f"adminx", "admin")
     assert rv.status_code == 403
 
-    rv = login(client, username, f"{password}x")
+
+def test_login_logout_bad_password(client):
+    rv = login(client, "admin", "not_correct_password")
     assert rv.status_code == 403
 
 
-def test_upload_record(app, client):
+def test_upload_record(client):
     """Test adding a sample roster and parsing"""
-    rv = login(client, "admin", app.config["ADMIN_PASSWORD"])
+    rv = login(client, "admin", "admin")
     assert rv.status_code == 200
 
     data = {}
@@ -79,11 +88,8 @@ def test_upload_record(app, client):
     assert b'placeholder="(808) 123-4567"' in rv.data
 
     assert b"Station,International Space" in rv.data
-    assert (
-        b'<input name="dept" type="text" class="form-control" value="Curriculum Studies" disabled />'
-        in rv.data
-    )
-    assert b'id="active"\n\t\t\tchecked>' in rv.data
+    assert b'value="Curriculum Studies" disabled />' in rv.data
+    assert b'id="active" checked>' in rv.data
 
     rv = client.get("/upload_record")
     assert b"Found 10 new workers" in rv.data
