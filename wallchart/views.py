@@ -86,7 +86,7 @@ def homepage():
 def download_db():
     return send_file(
         current_app.config["DATABASE"][len("sqlite:///") :],
-        download_name=f"wallcharts-backup-{date.today().strftime('%d-%m-%Y')}.db",
+        download_name=f"wallcharts-backup-{date.today().strftime('%Y-%m-%d')}.db",
     )
 
 
