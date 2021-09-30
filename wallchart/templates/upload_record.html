@@ -2,33 +2,41 @@
 {% block body %}
 <h2 class="p-2 text-left display-5">Upload contract record</h2>
 <form class="mb-5" method=post enctype=multipart/form-data>
-    <input type=file name=record>
-    <input type=submit value=Upload>
+  <input type=file name=record>
+  <input type=submit value=Upload>
 </form>
 
 <ul>
-	<li>New workers: {{ new_workers | length }}</li>
+  <li>New workers: {{ new_workers | length }}</li>
 </ul>
 
 <h2>New workers</h2>
 
 {% for department_name, workers in new_workers | groupby("department_name") %}
 <h3>
-    {{ department_name }}
+  {{ department_name }}
 </h3>
 <table class="table table-striped table-hover">
-    <thead>
-        <th class="col-8">Name</th>
-        <th class="col-2">Unit</th>
-        <th class="col-2">Contract</th>
-    </thead>
-    {% for worker in workers %}
-    <tr>
-        <td>{{ worker.name }}</td>
-        <td>{{ worker.unit }}</td>
-        <td>{{ worker.contract }}</td>
-    </tr>
-    {% endfor %}
+  <thead>
+    <th class="col-8">Name</th>
+    <th class="col-2">Unit</th>
+    <th class="col-2">Contract</th>
+  </thead>
+  {% for worker in workers %}
+  <tr>
+    <td>
+      <a href="{{ url_for('worker', worker_id=worker.id) }}">
+        {% if worker.preferred_name%}
+        <b>{{ worker.preferred_name }}</b> ({{ worker.name }})
+        {% else %}
+        <b>{{ worker.name }}</b>
+        {% endif %}
+      </a>
+    </td>
+    <td>{{ worker.unit }}</td>
+    <td>{{ worker.contract }}</td>
+  </tr>
+  {% endfor %}
 </table>
 {% endfor %}
 {% endblock %}
