@@ -13,10 +13,18 @@
     {% else %}
     {{ worker.name }}
     {% endif %}
+    <a href="{{ url_for('worker_delete', worker_id=worker.id) }}">
+            <button type="submit" class="btn btn-sm" onclick="return confirm('Do you really want to delete {{ worker.name }}');">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                </svg>
+            </button>
+    </a>
 </h2>
 <p>
     {% if worker.password %}
-    <span class="badge bg-primary">User</span>
+    <span class="badge bg-primary">Can Login</span>
     {% endif %}
     {% if worker.updated != last_updated %}
     <span class="badge bg-danger">Not updated in last record</span>
@@ -128,7 +136,8 @@
         <div class="row mb-3">
             <label for="password" class="col-md-2 col-form-label">Password</label>
             <div class="col-md-10">
-                <input type="password" class="form-control" id="password" name="password">
+                <input type="password" class="form-control" id="password" name="password" 
+			  {% if worker.password %}placeholder="Password already set"{% endif %}>
                 <div id="passwordHelp" class="form-text">If a password is added the worker can
                     login.</div>
             </div>

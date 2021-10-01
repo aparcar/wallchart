@@ -14,6 +14,7 @@ from flask import (
     url_for,
 )
 from peewee import JOIN, Case, fn
+from playhouse.flask_utils import get_object_or_404
 from slugify import slugify
 
 from wallchart.db import Department, Participation, StructureTest, Unit, Worker
@@ -325,6 +326,16 @@ def structure_tests():
         structure_tests=structure_tests,
         worker_count=worker_count,
     )
+
+
+@views.route("/worker/<int:worker_id>/delete")
+@login_required
+def worker_delete(worker_id):
+    worker = get_object_or_404(Worker, (Worker.id == worker_id))
+    Worker.delete().where(Worker.id == worker_id).execute()
+    Participation.delete().where(Participation.worker == worker_id).execute()
+    flash(f"Deleted worker {worker.name} ({worker.id})")
+    return redirect(url_for("homepage"))
 
 
 @views.route("/worker/", methods=["GET", "POST"])

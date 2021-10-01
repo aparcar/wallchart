@@ -1,4 +1,4 @@
-from tests.conftest import login, logout
+from tests.conftest import admin_login, login, logout
 
 
 def test_empty_db(client):

@@ -1,6 +1,7 @@
-from wallchart import util
-from tests.conftest import login
 import bcrypt
+
+from tests.conftest import login
+from wallchart import util
 
 
 def test_bcryptify():
