@@ -16,7 +16,6 @@
 <div class="table-container"></div>
 
 <script src="{{ url_for('static', filename='fuse.js') }}"></script>
-<script src="{{ url_for('static', filename='axios.min.js') }}"></script>
 <script>
   const endpoint = "/api/workers";
 
@@ -26,12 +25,8 @@
     searchString: "",
   };
 
-  const request = axios
-    .get(endpoint)
-    .then((response) => {
-      const data = response.data;
-      return data;
-    })
+  fetch(endpoint)
+    .then(response => response.json())
     .catch(function (error) {
       console.log(error);
     })
