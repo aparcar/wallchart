@@ -13,6 +13,7 @@
     {% else %}
     {{ worker.name }}
     {% endif %}
+    {%- if worker.id %}
     <a href="{{ url_for('worker_delete', worker_id=worker.id) }}">
             <button type="submit" class="btn btn-sm" onclick="return confirm('Do you really want to delete {{ worker.name }}');">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
@@ -21,6 +22,7 @@
                 </svg>
             </button>
     </a>
+    {% endif %}
 </h2>
 <p>
     {% if worker.password %}
