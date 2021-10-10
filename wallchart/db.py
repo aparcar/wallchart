@@ -77,6 +77,11 @@ def create_tables():
         db_wrapper.database.create_tables(
             [Unit, Department, Worker, StructureTest, Participation]
         )
+        department, _ = Department.get_or_create(
+            id=0,
+            name="Admin",
+            slug="admin",
+        )
 
 
 def close():
