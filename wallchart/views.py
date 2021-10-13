@@ -95,7 +95,7 @@ def download_db():
 def admin():
     department_count = Department.select(fn.count(Department.id)).scalar()
     worker_count = (
-        Worker.select(fn.count(Worker.id)).where(Worker.updated > max_age()).scalar()
+        Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
     )
     return render_template(
         "admin.html",
@@ -223,7 +223,17 @@ def departments():
             Case(None, ((Unit.name.is_null(), "No Unit"),), Unit.name).alias(
                 "unit_name"
             ),
-            fn.count(Worker.id).alias("worker_count"),
+            # select `none` as entry to calculate the total number of workers.
+            # It's a LEFT JOIN so all workers are selected, however if they
+            # participated in both structure tests they appear twice. This
+            # means a simple count is not possible since the numbers would be
+            # off. Instead count how many people did not participate in any
+            # test and add it to the with highest participation.
+            # Reminder: 0 or 1 participations result in 1 row (left join), two
+            # participations result in two row.
+            fn.sum(Case(None, ((Participation.structure_test.is_null(), 1),), 0)).alias(
+                "none"
+            ),
             fn.sum(Case(Participation.structure_test, ((1, 1),), 0)).alias("members"),
             fn.sum(Case(Participation.structure_test, ((latest_test.id, 1),), 0)).alias(
                 "latest"
@@ -267,7 +277,7 @@ def department(department_slug=None):
     else:
         department = Department.get(Department.id == session["department_id"])
 
-    workers = (
+    workers_active = (
         Worker.select(
             Worker,
             fn.group_concat(Participation.structure_test)
@@ -278,14 +288,35 @@ def department(department_slug=None):
         )
         .join(Participation, JOIN.LEFT_OUTER, on=(Worker.id == Participation.worker))
         .where(
-            (
-                (Worker.organizing_dept_id == department.id)
-                | (Worker.department_id == department.id)
-            )
+            ((Worker.organizing_dept_id == department.id))
             & (Worker.updated > max_age())
+            & (Worker.active == True)
         )
         .group_by(Worker.id)
         .order_by(Worker.active.desc(), Worker.name, Participation.structure_test)
+    )
+    workers_inactive = (
+        Worker.select(Worker)
+        .where(
+            (Worker.organizing_dept_id == department.id)
+            & (Worker.department_id == department.id)
+            & (Worker.updated > max_age())
+            & (Worker.active == False)
+        )
+        .group_by(Worker.id)
+        .order_by(Worker.active.desc(), Worker.name)
+    )
+
+    workers_external = (
+        Worker.select(Worker)
+        .where(
+            (Worker.organizing_dept_id != department.id)
+            & (Worker.department_id == department.id)
+            & (Worker.updated > max_age())
+            & (Worker.active == False)
+        )
+        .group_by()
+        .order_by(Worker.active.desc(), Worker.name)
     )
 
     units = Unit.select().order_by(Unit.name)
@@ -294,8 +325,9 @@ def department(department_slug=None):
 
     return render_template(
         "department.html",
-        workers=workers,
-        worker_count=len(workers),
+        workers_active=workers_active,
+        workers_inactive=workers_inactive,
+        workers_external=workers_external,
         department=department,
         structure_tests=structure_tests,
         last_updated=last_updated(),

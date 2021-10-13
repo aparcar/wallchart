@@ -11,7 +11,8 @@
         <th scope="col">Chair(s)</th>
     </tr>
     {% for department in departments %}
-    {% if department.worker_count > 0 %}
+    {% set worker_count = department.none + ([department.members, department.latest] | max) %}
+    {% if worker_count > 0 %}
     <tr>
         <td>
             <a href="{{ url_for('department', department_slug=department.slug) }}">
@@ -20,20 +21,24 @@
                 {% else %}
                 <b>{{ department.name }}</b>
                 {% endif %}
-                ({{ department.worker_count }})
+		({{ worker_count }})
             </a>
         </td>
         <td>
-            {% if department.worker_count > 0 %}
-            {% set percentage = ( department.members / department.worker_count * 100) | round(2) %}
+            {% if worker_count > 0 %}
+            {% set percentage = ( department.members / worker_count * 100) | round(2) %}
             {% endif %}
-            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}" title="{{ department.members }}&#x2F;{{department.worker_count}} completed">{{ department.members }} / {{department.worker_count }}</meter>
+            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"
+		    title="{{ department.members }}&#x2F;{{ worker_count}} completed">{{ department.members }} / {{department.worker_count }}
+	    </meter>
         </td>
         <td>
-            {% if department.worker_count > 0 %}
-            {% set percentage = ( department.latest / department.worker_count * 100) | round(2) %}
+            {% if worker_count > 0 %}
+            {% set percentage = ( department.latest / worker_count * 100) | round(2) %}
             {% endif %}
-            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}" title="{{ department.latest }}&#x2F;{{ department.worker_count }} completed"></meter>
+            <meter style="height: 25px;" low="50" high="80" max="100" optimum="100" value="{{ percentage }}"
+		    title="{{ department.latest }}&#x2F;{{ worker_count }} completed">
+	    </meter>
         </td>
         <td>
 
