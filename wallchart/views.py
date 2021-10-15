@@ -461,6 +461,15 @@ def worker(worker_id=None):
     )
 
 
+@views.route("/user/<int:user_id>/delete")
+@login_required
+def user_delete(user_id):
+    user = get_object_or_404(Worker, (Worker.id == user_id))
+    Worker.update({Worker.password: None}).where(Worker.id == user_id).execute()
+    flash(f"Deleted user password of {user.name} ({user.id})")
+    return redirect(url_for("users"))
+
+
 @views.route("/users/", methods=["GET", "POST"])
 @login_required
 def users():
@@ -474,6 +483,7 @@ def users():
         Worker.select(Worker, Department.name.alias("department_name"))
         .join(Department, on=(Worker.organizing_dept_id == Department.id))
         .where(Worker.password.is_null(False))
+        .order_by(Worker.name)
         .dicts()
     )
     units = Unit.select().order_by(Unit.name)
