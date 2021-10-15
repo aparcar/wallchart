@@ -77,6 +77,9 @@
 	  {% if worker.added == last_updated %}
 		 <span class="badge bg-info">New Worker</span>
 	  {% endif %}
+	  {% if worker.password != None %}
+		 <span class="badge bg-success">Alakaʻi</span>
+	  {% endif %}
         </a>
       </td>
       <td>{% if worker.email %}<a
