@@ -100,7 +100,13 @@
 </table>
 
 {% if workers_inactive %}
-<h3>No longer employed worker ({{ workers_inactive | length }})</h3>
+<h3>
+  No longer employed worker ({{ workers_inactive | length }})
+  {% with name="Test", help_title="Looking for answers", content="Trying my best!" %}
+    {% include "includes/modal.html" %}
+  {% endwith %}
+</h3>
+
 <table class="table table-striped table-hover">
   <thead>
     <tr>
