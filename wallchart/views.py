@@ -92,6 +92,7 @@ def download_db():
 
 
 @views.route("/admin")
+@login_required
 def admin():
     department_count = Department.select(fn.count(Department.id)).scalar()
     worker_count = (
@@ -107,6 +108,7 @@ def admin():
 
 @views.route("/structure_test", methods=["GET", "POST"])
 @views.route("/structure_test/<int:structure_test_id>", methods=["GET", "POST"])
+@login_required
 def structure_test(structure_test_id=None):
     if request.method == "POST":
         data = dict(
@@ -506,6 +508,7 @@ def former():
 
 
 @views.route("/participation/<int:worker_id>/<int:structure_test_id>/<int:status>")
+@login_required
 def participation(worker_id, structure_test_id, status):
     worker = Worker.get(Worker.id == worker_id)
     if session.get("department_id") == worker.organizing_dept_id or is_admin():
