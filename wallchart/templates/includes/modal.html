@@ -32,7 +32,10 @@
   var myModal = document.getElementById('{{ name }}')
   var myInput = document.getElementById('{{ name }}')
 
-myModal.addEventListener('shown.bs.modal', function () {
-  myInput.focus()
+$('#myModal').on('shown.bs.modal', function () {
+  $('#myInput').trigger('focus')
 })
+<!-- myModal.addEventListener('shown.bs.modal', function () { -->
+  <!-- myInput.focus() -->
+<!-- }) -->
 </script>
