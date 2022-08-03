@@ -8,18 +8,27 @@ __version__ = "0.1.0"
 db_wrapper = FlaskDB()
 
 
-def create_app(config=None):
+def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object("wallchart.defaults")
-    app.config.from_pyfile("config.py", silent=True)
+
+    if test_config is None:
+        # look for a config file in these places
+        config_locations = [os.getcwd(), os.path.join(os.path.expanduser('~'), '.config/wallchart'), '/etc/wallchart/']
+        for path in config_locations:
+            success = app.config.from_pyfile(os.path.join(path,'config.py'), silent=True)
+            # if config loaded successfully, stop looking
+            if success:
+                print(f'Config loaded from {path}/config.py')
+                break
+    else:
+        # load a test_config in for unit testing
+        if isinstance(test_config, dict):
+            app.config.update(test_config)
+        elif test_config.endswith(".py"):
+            app.config.from_pyfile(test_config)
 
     app.config["DATABASE"] = f"sqlite:///{app.instance_path}/wallcharts.db"
-
-    if config is not None:
-        if isinstance(config, dict):
-            app.config.update(config)
-        elif config.endswith(".py"):
-            app.config.from_pyfile(config)
 
     assert (
         app.secret_key != "changeme"
