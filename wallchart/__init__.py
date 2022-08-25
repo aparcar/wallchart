@@ -2,6 +2,7 @@ import os
 
 from flask import Flask
 from playhouse.flask_utils import FlaskDB
+from pathlib import Path
 
 __version__ = "0.1.0"
 
@@ -14,12 +15,15 @@ def create_app(test_config=None):
 
     if test_config is None:
         # look for a config file in these places
-        config_locations = [os.getcwd(), os.path.join(os.path.expanduser('~'), '.config/wallchart'), '/etc/wallchart/']
+        config_locations = [
+            Path.cwd(),
+            Path.home() / ".config/wallchart",
+            Path("/etc/wallchart"),
+        ]
         for path in config_locations:
-            success = app.config.from_pyfile(os.path.join(path,'config.py'), silent=True)
-            # if config loaded successfully, stop looking
-            if success:
-                print(f'Config loaded from {path}/config.py')
+            if (path / "config.py").exists():
+                app.config.from_pyfile(path / "config.py")
+                print(f"Config loaded from {path}/config.py")
                 break
     else:
         # load a test_config in for unit testing
@@ -28,15 +32,13 @@ def create_app(test_config=None):
         elif test_config.endswith(".py"):
             app.config.from_pyfile(test_config)
 
-    app.config["DATABASE"] = f"sqlite:///{app.instance_path}/wallcharts.db"
+    app.config["DATABASE"] = f"sqlite:///{app.config['DATABASE']}"
 
-    assert (
-        app.secret_key != "changeme"
-    ), f"Change flask secret in {app.instance_path }/config.py"
+    assert app.secret_key != "changeme", f"Please change SECRET_KEY in config.py"
 
     assert (
         app.config["ADMIN_PASSWORD"] != "changeme"
-    ), f"Change admin password in {app.instance_path}/config.py"
+    ), f"Please change ADMIN_PASSWORD in config.py"
 
     try:
         os.makedirs(app.instance_path)
