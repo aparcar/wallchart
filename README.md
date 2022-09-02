@@ -41,7 +41,8 @@ command below.
 To run `wallchart` execute the following command.
 
 	poetry shell
-	gunicorn "wallchart:create_app()"
+	flask db create-tables
+	gunicorn
 
 You'll find the web interface at http://localhost:8000
 
@@ -51,8 +52,8 @@ For development you may use the internal Flask web server which automatically
 reloads files after modification.
 
 	poetry shell
-	export FLASK_APP="wallchart:create_app()"
 	export FLASK_DEBUG=1
+	flask db create-tables
 	flask run
 
 After changing things, don't forget to see if all tests still pass.
