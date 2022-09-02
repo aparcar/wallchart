@@ -12,6 +12,7 @@ peewee = "^3.14.4"
 python-slugify = "^5.0.2"
 bcrypt = "^3.2.0"
 PyYAML = "^5.4.1"
+six = "^1.16.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
