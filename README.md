@@ -13,22 +13,21 @@ not yet installed on the system, do so by running the following command.
 
 	pip install poetry
 
-To install `wallchart` clone this repository and make `poetry` install all dependencies.
+To install `wallchart` just use `pip`
 
-	git clone https://github.com/aparcar/wallchart.git
-	cd wallchart/
-	poetry install
+	pip install wallchart
 
 Now all dependencies should be in place and it's possible to either run
 `wallchart` or start developing. Next you should create a `config.py` file
 which contains both an admin password as well as an application secret (used to
 encrypt cookies).
 
-	mkdir instance/
-	cp wallchart/defaults.py instance/config.py
+A `config.py` file should contain at least the following settings:
 
-Modify both variables `ADMIN_PASSWORD` and `SECRET_KEY` else `wallchart`
-refuses to start.
+	ADMIN_PASSWORD = "changeme"
+	SECRET_KEY = "changeme"
+
+Optionally define `DATABASE` if you don't like the sqlite database at `./wallchart.db`.
 
 ## Running
 
@@ -47,6 +46,12 @@ To run `wallchart` execute the following command.
 You'll find the web interface at http://localhost:8000
 
 ## Development
+
+Get the source code
+
+	git clone https://github.com/aparcar/wallchart.git
+	cd wallchart/
+	poetry install
 
 For development you may use the internal Flask web server which automatically
 reloads files after modification.
