@@ -43,7 +43,6 @@
         <td>
 
 		{% for chair in department.chairs %}
-		{% if not chair.unit_chair_id %}
 		<a href="{{ url_for("worker", worker_id=chair.id) }}">
 		    {%- if chair.preferred_name %}
 		    {{ chair.preferred_name }} ({{ chair.name }})
@@ -51,7 +50,6 @@
 		    {{ chair.name }}
 		    {% endif %}
 		</a>
-		{% endif %}
 		{% endfor %}
 	</td>
     </tr>
