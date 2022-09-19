@@ -52,7 +52,7 @@ def parse_csv(csv_file_b):
     with open("mapping.yml") as mapping_file:
         mapping = yaml.safe_load(mapping_file)
 
-    with TextIOWrapper(csv_file_b, encoding="utf-8") as csv_file:
+    with open(csv_file_b, 'r', encoding="utf-8") as csv_file:
         reader = csv.DictReader(csv_file, delimiter=";")
 
         for row in reader:
