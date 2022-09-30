@@ -45,11 +45,14 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from wallchart.db import db
+    from wallchart import db
 
-    app.register_blueprint(db)
+    app.register_blueprint(db.db)
 
     db_wrapper.init_app(app)
+
+    if not Path(app.config["DATABASE"]).exists():
+        db.create_tables()
 
     from wallchart.views import views
 
