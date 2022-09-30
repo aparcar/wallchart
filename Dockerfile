@@ -11,6 +11,8 @@ RUN poetry config virtualenvs.create false \
 
 COPY ./wallchart/ ./wallchart/
 
+COPY ./mapping.yml .
+
 COPY ./app.py .
 
 CMD ["gunicorn"  , "-b", "0.0.0.0:8000", "app"]
