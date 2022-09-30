@@ -44,6 +44,21 @@ To run `wallchart` execute the following command.
 
 You'll find the web interface at http://localhost:8000
 
+### Docker
+
+The `config.py` should define the database in it's own folder, like below:
+
+	DATABASE = "/database/database.db"
+
+Run this in Docker, if you like:
+
+	docker run \
+		-v $(pwd)/config.py:/app/config.py \
+		-v wallchart-database:/database/ \
+		-p 8000:8000 \
+		--rm \
+		wallchart
+
 ## Development
 
 Get the source code
