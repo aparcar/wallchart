@@ -32,3 +32,24 @@ jobs:
           poetry publish \
             --username ${{ secrets.PYPI_USERNAME }} \
             --password ${{ secrets.PYPI_PASSWORD }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: runborg/wallchart
+          tags: |
+            type=semver,pattern={{version}}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push wallchart to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
