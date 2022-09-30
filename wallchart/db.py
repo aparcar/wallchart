@@ -87,11 +87,3 @@ def create_tables():
 def close():
     if not db_wrapper.database.is_closed():
         db_wrapper.database.close()
-
-
-@db.cli.command("create-tables")
-def cli_create_tables():
-    print("Creating database tables...")
-    with current_app.app_context():
-        create_tables()
-    print("Done")
