@@ -87,6 +87,7 @@ def parse_csv(csv_file_b):
                 contract=row["Job Code"],
                 unit=row["Campus"],
                 department_id=department.id,
+                active=True,
             ).where(
                 Worker.id == worker.id,
             ).execute()
