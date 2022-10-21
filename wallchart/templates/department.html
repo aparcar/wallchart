@@ -50,9 +50,13 @@
         (element.checked ? 1 : 0))
       .then(response => console.log(response));
   }
+  function copyEmailsToClipboard(){
+    let emails = "{{emails}}";
+    navigator.clipboard.writeText(emails);
+  }
 </script>
 <h3>Organized Workers in this department ({{ workers_active | length }})</h3>
-
+<button onclick="copyEmailsToClipboard();"">Copy emails to clipboard</button>
 <table class="table table-striped table-hover">
   <thead>
     <tr>
