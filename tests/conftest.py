@@ -16,7 +16,7 @@ def app():
     app = wallchart.create_app(
         {
             "ADMIN_PASSWORD": "admin",
-            "DATABASE": f"sqlite:///{db_path}",
+            "DATABASE": db_path,
             "SECRET_KEY": "test",
             "TESTING": True,
         }

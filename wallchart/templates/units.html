@@ -13,7 +13,7 @@ function toggle_departments(unit) {
     <tr>
         <th scope="col" class="col-5">Name</th>
         <th scope="col" class="col-1">Members</th>
-	<th scope="col" class="col-1">{{ latest_test_name }}</th>
+		<th scope="col" class="col-1">{{ latest_test_name }}</th>
         <th scope="col" class="col-5">Organizer</th>
     </tr>
     {% for unit in units %}
@@ -38,7 +38,6 @@ function toggle_departments(unit) {
         <td>
 		<ul>
 		{% for chair in unit.chairs %}
-		{% if chair.unit_chair_id %}
 		<li>
 		<a href="{{ url_for("worker", worker_id=chair.id) }}">
 		    {%- if chair.preferred_name %}
@@ -48,7 +47,6 @@ function toggle_departments(unit) {
 		    {% endif %}
 		</a>
 		</li>
-		{% endif %}
 		{% endfor %}
 		<ul>
 	</td>
@@ -67,7 +65,6 @@ function toggle_departments(unit) {
 	<td>
 		<ul><ul>
 		{% for chair in department.chairs %}
-		{% if not chair.unit_chair_id %}
 		<li>
 		<a href="{{ url_for("worker", worker_id=chair.id) }}">
 		    {%- if chair.preferred_name %}
@@ -77,7 +74,6 @@ function toggle_departments(unit) {
 		    {% endif %}
 		</a>
 		</li>
-		{% endif %}
 		{% endfor %}
 		</ul></ul>
 	</td>

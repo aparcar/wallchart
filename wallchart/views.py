@@ -92,13 +92,24 @@ def download_db():
 
 
 @views.route("/admin")
+@login_required
 def admin():
     department_count = Department.select(fn.count(Department.id)).scalar()
     worker_count = (
         Worker.select(fn.count(Worker.id)).where(Worker.active == True).scalar()
     )
+    
+    emails = (
+        Worker.select().where(Worker.active == True).where(Worker.email.is_null(False))
+    )
+    emailList = ""
+    for user in emails:
+        emailList = emailList + user.email + ", "
+    emailList = emailList[0:len(emailList)-2]
+
     return render_template(
         "admin.html",
+        emails=emailList,
         last_updated=last_updated(),
         department_count=department_count,
         worker_count=worker_count,
@@ -107,6 +118,7 @@ def admin():
 
 @views.route("/structure_test", methods=["GET", "POST"])
 @views.route("/structure_test/<int:structure_test_id>", methods=["GET", "POST"])
+@login_required
 def structure_test(structure_test_id=None):
     if request.method == "POST":
         data = dict(
@@ -321,6 +333,13 @@ def department(department_slug=None):
 
     units = Unit.select().order_by(Unit.name)
 
+    emailList = ""
+    for user in workers_active:
+        if(user.email):
+            emailList = emailList + str(user.email) + ", "
+
+    emailList = emailList[0:len(emailList)-2]
+
     structure_tests = StructureTest.select().order_by(StructureTest.added)
 
     return render_template(
@@ -331,6 +350,7 @@ def department(department_slug=None):
         department=department,
         structure_tests=structure_tests,
         last_updated=last_updated(),
+        emails=emailList,
         units=units,
     )
 
@@ -506,6 +526,7 @@ def former():
 
 
 @views.route("/participation/<int:worker_id>/<int:structure_test_id>/<int:status>")
+@login_required
 def participation(worker_id, structure_test_id, status):
     worker = Worker.get(Worker.id == worker_id)
     if session.get("department_id") == worker.organizing_dept_id or is_admin():
