@@ -6,6 +6,7 @@ __pycache__/
 config.ini
 config.py
 coverage.xml
+*.DS_Store
 dist/
 htmlcov/
 instance/

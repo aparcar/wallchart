@@ -56,6 +56,23 @@
   }
 </script>
 <h3>Organized Workers in this department ({{ workers_active | length }})</h3>
+{% with name="help_workers", help_title="Why is a worker listed here?", 
+content="<p>Any worker listed here is someone to be organized in this department! "
+  "<strong>If you think the worker belongs elsewhere, you can change the worker's "
+  "'organizing department' on their worker page by selecting a different department "
+  "from the drop-down menu.</strong></p>"
+  "<p>If you think that this worker is no longer employed, you can uncheck their "
+  "'active' status on their worker page and this will move them to the table below.</p>"
+  "<p>If you think that a worker is missing, you have a few options. First, you "
+  "should make sure that worker is not listed in another department by looking at the "
+  "'Externally organized workers' table below. You can also search for a worker using "
+  "the 'Find Worker' feature in the menu bar. If you still have no success, you can "
+  "manually add (or ask admin to if you don't have access) a worker from the 'Admin' "
+  "menu in the menubar.</p>"
+  %}
+  {% include "includes/modal.html" %}
+{% endwith %}
+
 <button onclick="copyEmailsToClipboard();"">Copy emails to clipboard</button>
 <table class="table table-striped table-hover">
   <thead>
@@ -104,7 +121,25 @@
 </table>
 
 {% if workers_inactive %}
-<h3>No longer employed worker ({{ workers_inactive | length }})</h3>
+<div name="not_employed">
+<h3 display="inline-block">
+  No longer employed worker ({{ workers_inactive | length }})
+</h3>
+  {% with name="help_not_employed", help_title="Why is a worker listed here?", 
+  content="<p>Any worker listed here is considered 'inactive'. "
+    "<strong>To move someone from this list, you can recheck their 'Active' "
+    "status on their worker page (click on their name and recheck the "
+    "'Active' box.</strong></p>"
+    "<p>This can happen for a few reasons. The worker was previously on a "
+    "contract but they were not included on the most recent contract. "
+    "Or the worker's 'Active' status was unchecked by a user of the wallchart. "
+    "Note that if a worker is inactive for over a year, they will be hidden. "
+    "If you would like to restore a hidden worker, please contact admin.</p>"
+    %}
+    {% include "includes/modal.html" %}
+  {% endwith %}
+</div>
+
 <table class="table table-striped table-hover">
   <thead>
     <tr>
@@ -132,6 +167,16 @@
 
 {% if workers_external %}
 <h3>Externally organized workers ({{ workers_external | length }})</h3>
+{% with name="help_externally_orged", help_title="Why is a worker listed here?", 
+content="<p>Any worker listed here is being organized in another department. "
+  "<strong>To change this, the worker's 'organizing department' can be updated "
+  "on their worker page by selecting a new department from the drop down menu. "
+  "</strong></p>"
+  "<p>Ideally, let the organizer for the department that the worker is currently "
+    "listed in know that you are doing this!</p>"
+  %}
+  {% include "includes/modal.html" %}
+{% endwith %}
 <table class="table table-striped table-hover">
   <thead>
     <tr>
