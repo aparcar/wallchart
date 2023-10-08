@@ -9,7 +9,7 @@ from flask import redirect, session, url_for
 from peewee import fn
 from slugify import slugify
 
-from wallchart.db import Department, Worker
+from wallchart.db import Department, Worker, Unit
 
 
 def max_age():
@@ -53,40 +53,67 @@ def parse_csv(csv_file_b):
         mapping = yaml.safe_load(mapping_file)
 
     with TextIOWrapper(csv_file_b, encoding="utf-8") as csv_file:
-        reader = csv.DictReader(csv_file, delimiter=";")
+        reader = csv.DictReader(csv_file, delimiter=",")
 
         for row in reader:
-            department_name = mapping["mapping"].get(row["Sect Desc"], row["Sect Desc"])
+            # print(row.items())
+            # department_name = mapping["mapping"].get(row["Sect Desc"], row["Sect Desc"])
+
+            unit_name = row["Unit (in UnionWare)"]
+            unit, _ = Unit.get_or_create(
+                name=unit_name.title(),
+                slug=slugify(unit_name),
+            )
+
+            department_name = f"Unknown ({unit_name})"
+
             department, _ = Department.get_or_create(
                 # name=row["Job Sect Desc"].title(),
                 # slug=slugify(row["Job Sect Desc"]),
                 name=department_name.title(),
+                # unit=unit,
                 slug=slugify(department_name),
             )
+            # print('dpet unit', department.unit, department.unit is None)
 
-            worker_name = f"{row['Last']},{row['First Name']}"
-            if row["Middle"]:
-                worker_name += f" {row['Middle']}"
+            # # Populate department unit if it hasn't been set
+            try:
+                print(department.unit)
+
+            except Unit.DoesNotExist:
+                department.update(
+                    unit=unit
+                ).where(
+                    Department.id == department.id,
+                ).execute()
+                # department.unit = unit
+            # print('dpet unit', department.unit.name)
+
+            worker_name = f"{row['Last Name']},{row['First Name']}"
+            # if row["Middle"]:
+            #     worker_name += f" {row['Middle']}"
 
             worker = Worker.get_or_none(
                 name=worker_name,
             )
 
             if not worker:
+                print("creating new worker")
                 worker = Worker.create(
                     # name=row["Name"],
                     name=worker_name,
                     department_id=department.id,
                     organizing_dept_id=department.id,
                     # default organizing_dept to department ID, can be changed later on
-                    # unit=row["Unit"],
+                    unit=unit,
                 )
 
             worker.update(
                 updated=date.today(),
-                contract=row["Job Code"],
-                unit=row["Campus"],
+                # contract=row["Job Code"],
+                unit=unit,
                 department_id=department.id,
+                organizing_dept_id=department.id,
                 active=True,
             ).where(
                 Worker.id == worker.id,

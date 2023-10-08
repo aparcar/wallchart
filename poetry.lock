@@ -385,7 +385,7 @@ unidecode = ["Unidecode (>=1.1.1)"]
 
 [[package]]
 name = "pyyaml"
-version = "5.4.1"
+version = "6.0.1"
 description = "YAML parser and emitter for Python"
 category = "main"
 optional = false
